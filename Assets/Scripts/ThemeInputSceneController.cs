@@ -26,7 +26,7 @@ public sealed class ThemeInputSceneController : MonoBehaviour
     private void DrawBackground()
     {
         var previousColor = GUI.color;
-        GUI.color = new Color(0.11f, 0.13f, 0.18f, 1f);
+        GUI.color = new Color(0.08f, 0.09f, 0.08f, 1f);
         GUI.DrawTexture(new Rect(0f, 0f, Screen.width, Screen.height), Texture2D.whiteTexture);
         GUI.color = previousColor;
     }
@@ -43,7 +43,7 @@ public sealed class ThemeInputSceneController : MonoBehaviour
             panelHeight);
 
         var previousColor = GUI.color;
-        GUI.color = new Color(0.94f, 0.95f, 0.98f, 1f);
+        GUI.color = new Color(0.83f, 0.75f, 0.57f, 1f);
         GUI.Box(panelRect, GUIContent.none);
         GUI.color = previousColor;
 
@@ -52,7 +52,7 @@ public sealed class ThemeInputSceneController : MonoBehaviour
             alignment = TextAnchor.MiddleCenter,
             fontSize = 32,
             fontStyle = FontStyle.Bold,
-            normal = { textColor = new Color(0.14f, 0.18f, 0.28f) }
+            normal = { textColor = new Color(0.2f, 0.11f, 0.05f) }
         };
 
         var bodyStyle = new GUIStyle(GUI.skin.label)
@@ -60,7 +60,7 @@ public sealed class ThemeInputSceneController : MonoBehaviour
             alignment = TextAnchor.MiddleCenter,
             fontSize = 16,
             wordWrap = true,
-            normal = { textColor = new Color(0.27f, 0.31f, 0.42f) }
+            normal = { textColor = new Color(0.25f, 0.17f, 0.09f) }
         };
 
         var inputStyle = new GUIStyle(GUI.skin.textArea)
@@ -77,10 +77,10 @@ public sealed class ThemeInputSceneController : MonoBehaviour
             normal = { textColor = new Color(0.55f, 0.2f, 0.16f) }
         };
 
-        GUI.Label(new Rect(panelRect.x, panelRect.y + 30f, panelRect.width, 44f), "Theme", titleStyle);
+        GUI.Label(new Rect(panelRect.x, panelRect.y + 30f, panelRect.width, 44f), "Quest Scroll", titleStyle);
         GUI.Label(
             new Rect(panelRect.x + 54f, panelRect.y + 92f, panelRect.width - 108f, 48f),
-            "Write the idea you want to defend. Next, choose the enemy who will challenge it.",
+            "Write the claim you will carry into the hall. Next, choose the foe who will test it.",
             bodyStyle);
 
         GUI.SetNextControlName("ThemeInput");
@@ -95,7 +95,7 @@ public sealed class ThemeInputSceneController : MonoBehaviour
             SceneManager.LoadScene(homeSceneName);
         }
 
-        if (GUI.Button(new Rect(panelRect.x + 330f, panelRect.y + 282f, 140f, 40f), "Choose Enemy"))
+        if (GUI.Button(new Rect(panelRect.x + 330f, panelRect.y + 282f, 140f, 40f), "Choose Foe"))
         {
             TryChooseEnemy();
         }
@@ -104,7 +104,7 @@ public sealed class ThemeInputSceneController : MonoBehaviour
         {
             GUI.Label(
                 new Rect(panelRect.x + 70f, panelRect.y + 344f, panelRect.width - 140f, 24f),
-                "Enter a theme before starting the battle.",
+                "Write a claim on the scroll before entering the trial.",
                 messageStyle);
         }
 

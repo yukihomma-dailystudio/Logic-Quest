@@ -7,9 +7,9 @@ public sealed class GameSceneController : MonoBehaviour
 
     private readonly string[] responses =
     {
-        "Clarify the claim before answering.",
-        "Counter with a stronger supporting reason.",
-        "Concede the weak point and revise the idea."
+        "Clarify the claim on the scroll.",
+        "Answer with a stronger supporting reason.",
+        "Concede the weak point and forge a better claim."
     };
 
     private string selectedTheme = "A short daily thinking quest";
@@ -33,7 +33,7 @@ public sealed class GameSceneController : MonoBehaviour
     private void DrawBackground()
     {
         var previousColor = GUI.color;
-        GUI.color = new Color(0.13f, 0.12f, 0.16f, 1f);
+        GUI.color = new Color(0.08f, 0.07f, 0.08f, 1f);
         GUI.DrawTexture(new Rect(0f, 0f, Screen.width, Screen.height), Texture2D.whiteTexture);
         GUI.color = previousColor;
     }
@@ -50,7 +50,7 @@ public sealed class GameSceneController : MonoBehaviour
             panelHeight);
 
         var previousColor = GUI.color;
-        GUI.color = new Color(0.95f, 0.94f, 0.98f, 1f);
+        GUI.color = new Color(0.82f, 0.74f, 0.56f, 1f);
         GUI.Box(panelRect, GUIContent.none);
         GUI.color = previousColor;
 
@@ -59,7 +59,7 @@ public sealed class GameSceneController : MonoBehaviour
             alignment = TextAnchor.MiddleCenter,
             fontSize = 30,
             fontStyle = FontStyle.Bold,
-            normal = { textColor = new Color(0.18f, 0.14f, 0.25f) }
+            normal = { textColor = new Color(0.2f, 0.11f, 0.05f) }
         };
 
         var sectionStyle = new GUIStyle(GUI.skin.label)
@@ -67,7 +67,7 @@ public sealed class GameSceneController : MonoBehaviour
             alignment = TextAnchor.UpperLeft,
             fontSize = 16,
             fontStyle = FontStyle.Bold,
-            normal = { textColor = new Color(0.22f, 0.18f, 0.3f) }
+            normal = { textColor = new Color(0.24f, 0.12f, 0.05f) }
         };
 
         var bodyStyle = new GUIStyle(GUI.skin.label)
@@ -75,7 +75,7 @@ public sealed class GameSceneController : MonoBehaviour
             alignment = TextAnchor.UpperLeft,
             fontSize = 15,
             wordWrap = true,
-            normal = { textColor = new Color(0.28f, 0.26f, 0.34f) }
+            normal = { textColor = new Color(0.22f, 0.15f, 0.08f) }
         };
 
         var resultStyle = new GUIStyle(GUI.skin.label)
@@ -83,15 +83,15 @@ public sealed class GameSceneController : MonoBehaviour
             alignment = TextAnchor.MiddleCenter,
             fontSize = 15,
             wordWrap = true,
-            normal = { textColor = new Color(0.16f, 0.32f, 0.24f) }
+            normal = { textColor = new Color(0.18f, 0.29f, 0.14f) }
         };
 
-        GUI.Label(new Rect(panelRect.x, panelRect.y + 26f, panelRect.width, 42f), "Challenge 1", titleStyle);
+        GUI.Label(new Rect(panelRect.x, panelRect.y + 26f, panelRect.width, 42f), "Trial 1", titleStyle);
 
         var contentX = panelRect.x + 48f;
         var contentWidth = panelRect.width - 96f;
 
-        GUI.Label(new Rect(contentX, panelRect.y + 88f, contentWidth, 24f), "Claim", sectionStyle);
+        GUI.Label(new Rect(contentX, panelRect.y + 88f, contentWidth, 24f), "Quest Scroll", sectionStyle);
         GUI.Label(
             new Rect(contentX, panelRect.y + 116f, contentWidth, 52f),
             selectedTheme,
@@ -103,7 +103,7 @@ public sealed class GameSceneController : MonoBehaviour
             enemyObjection,
             bodyStyle);
 
-        GUI.Label(new Rect(contentX, panelRect.y + 268f, contentWidth, 24f), "Choose a response", sectionStyle);
+        GUI.Label(new Rect(contentX, panelRect.y + 268f, contentWidth, 24f), "Choose a reply", sectionStyle);
 
         for (var i = 0; i < responses.Length; i++)
         {
@@ -117,11 +117,11 @@ public sealed class GameSceneController : MonoBehaviour
         {
             GUI.Label(
                 new Rect(contentX, panelRect.y + 424f, contentWidth, 28f),
-                "Response locked in. Phase 2 will turn this into scoring and progression.",
+                "Reply sworn. A later phase will award EXP and rank progress.",
                 resultStyle);
         }
 
-        if (GUI.Button(new Rect(panelRect.x + 24f, panelRect.y + 24f, 110f, 32f), "Home"))
+        if (GUI.Button(new Rect(panelRect.x + 24f, panelRect.y + 24f, 110f, 32f), "Guild"))
         {
             SceneManager.LoadScene(homeSceneName);
         }
@@ -132,17 +132,17 @@ public sealed class GameSceneController : MonoBehaviour
         switch (enemyName)
         {
             case "Logic Knight":
-                return "What is the strongest reason this claim should be true?";
+                return "What is the strongest proof that this claim should stand?";
             case "Realist Merchant":
-                return "Who would use this repeatedly, and why would they come back?";
+                return "Who would return to this market stall, and why would they pay attention again?";
             case "Harsh Reviewer":
-                return "Where will users feel friction or stop before the habit forms?";
+                return "Where will travelers tire of this path before the habit forms?";
             case "Ethics Guardian":
-                return "Could this idea be misunderstood or used in a harmful way?";
+                return "Could this spell be misunderstood or turned toward harmful use?";
             case "Cold Investor":
-                return "What makes this different enough to win against existing options?";
+                return "What makes this banner strong enough to win against rival houses?";
             default:
-                return "Can you explain this idea in one simple sentence?";
+                return "Can you explain this claim in one plain sentence?";
         }
     }
 }

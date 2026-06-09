@@ -56,7 +56,7 @@ public sealed class TitleSceneController : MonoBehaviour
         panelRect.anchoredPosition = Vector2.zero;
 
         var panelImage = GetOrAddComponent<Image>(panelTransform.gameObject);
-        panelImage.color = new Color(0.92f, 0.94f, 0.98f, 1f);
+        panelImage.color = new Color(0.82f, 0.73f, 0.55f, 1f);
 
         titleText = CreateText(
             panelTransform,
@@ -69,7 +69,7 @@ public sealed class TitleSceneController : MonoBehaviour
             42,
             FontStyle.Bold,
             TextAnchor.MiddleCenter,
-            new Color(0.12f, 0.16f, 0.24f),
+            new Color(0.21f, 0.12f, 0.06f),
             "ThinQuest");
 
         subtitleText = CreateText(
@@ -83,8 +83,8 @@ public sealed class TitleSceneController : MonoBehaviour
             18,
             FontStyle.Normal,
             TextAnchor.MiddleCenter,
-            new Color(0.28f, 0.32f, 0.42f),
-            "Think through enemy objections and strengthen your own ideas.");
+            new Color(0.25f, 0.17f, 0.1f),
+            "Enter the guild hall, face rival minds, and temper your claim.");
 
         startButton = CreateButton(
             panelTransform,
@@ -94,7 +94,7 @@ public sealed class TitleSceneController : MonoBehaviour
             new Vector2(0.5f, 0.5f),
             new Vector2(0f, -28f),
             new Vector2(200f, 42f),
-            "Start");
+            "Enter Guild");
 
         startButton.onClick.RemoveListener(HandleStartPressed);
         startButton.onClick.AddListener(HandleStartPressed);
@@ -110,7 +110,7 @@ public sealed class TitleSceneController : MonoBehaviour
             14,
             FontStyle.Normal,
             TextAnchor.MiddleCenter,
-            new Color(0.55f, 0.2f, 0.16f),
+            new Color(0.45f, 0.11f, 0.06f),
             "HomeScene is not added yet. Create the next scene and the Start button will connect automatically.");
 
         EnsureEventSystem();
@@ -125,7 +125,7 @@ public sealed class TitleSceneController : MonoBehaviour
 
         if (subtitleText != null)
         {
-            subtitleText.text = "Think through enemy objections and strengthen your own ideas.";
+            subtitleText.text = "Enter the guild hall, face rival minds, and temper your claim.";
         }
 
         if (messageText != null)
@@ -198,7 +198,7 @@ public sealed class TitleSceneController : MonoBehaviour
         rect.offsetMax = Vector2.zero;
 
         var image = GetOrAddComponent<Image>(background.gameObject);
-        image.color = new Color(0.11f, 0.12f, 0.18f, 1f);
+        image.color = new Color(0.08f, 0.09f, 0.08f, 1f);
     }
 
     private Button CreateButton(
@@ -220,13 +220,13 @@ public sealed class TitleSceneController : MonoBehaviour
         rect.sizeDelta = sizeDelta;
 
         var image = GetOrAddComponent<Image>(buttonTransform.gameObject);
-        image.color = new Color(0.2f, 0.37f, 0.76f, 1f);
+        image.color = new Color(0.47f, 0.24f, 0.08f, 1f);
 
         var button = GetOrAddComponent<Button>(buttonTransform.gameObject);
         var colors = button.colors;
         colors.normalColor = image.color;
-        colors.highlightedColor = new Color(0.24f, 0.42f, 0.84f, 1f);
-        colors.pressedColor = new Color(0.16f, 0.31f, 0.65f, 1f);
+        colors.highlightedColor = new Color(0.62f, 0.35f, 0.12f, 1f);
+        colors.pressedColor = new Color(0.34f, 0.16f, 0.05f, 1f);
         colors.selectedColor = colors.highlightedColor;
         colors.disabledColor = new Color(0.35f, 0.35f, 0.4f, 0.7f);
         button.colors = colors;

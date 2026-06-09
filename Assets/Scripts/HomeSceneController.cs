@@ -17,7 +17,7 @@ public sealed class HomeSceneController : MonoBehaviour
     private void DrawBackground()
     {
         var previousColor = GUI.color;
-        GUI.color = new Color(0.1f, 0.14f, 0.13f, 1f);
+        GUI.color = new Color(0.09f, 0.11f, 0.09f, 1f);
         GUI.DrawTexture(new Rect(0f, 0f, Screen.width, Screen.height), Texture2D.whiteTexture);
         GUI.color = previousColor;
     }
@@ -34,7 +34,7 @@ public sealed class HomeSceneController : MonoBehaviour
             panelHeight);
 
         var previousColor = GUI.color;
-        GUI.color = new Color(0.93f, 0.96f, 0.93f, 1f);
+        GUI.color = new Color(0.82f, 0.74f, 0.56f, 1f);
         GUI.Box(panelRect, GUIContent.none);
         GUI.color = previousColor;
 
@@ -43,7 +43,7 @@ public sealed class HomeSceneController : MonoBehaviour
             alignment = TextAnchor.MiddleCenter,
             fontSize = 34,
             fontStyle = FontStyle.Bold,
-            normal = { textColor = new Color(0.1f, 0.2f, 0.16f) }
+            normal = { textColor = new Color(0.2f, 0.11f, 0.05f) }
         };
 
         var bodyStyle = new GUIStyle(GUI.skin.label)
@@ -51,7 +51,7 @@ public sealed class HomeSceneController : MonoBehaviour
             alignment = TextAnchor.MiddleCenter,
             fontSize = 17,
             wordWrap = true,
-            normal = { textColor = new Color(0.25f, 0.32f, 0.3f) }
+            normal = { textColor = new Color(0.25f, 0.17f, 0.09f) }
         };
 
         var messageStyle = new GUIStyle(GUI.skin.label)
@@ -62,18 +62,18 @@ public sealed class HomeSceneController : MonoBehaviour
             normal = { textColor = new Color(0.55f, 0.22f, 0.16f) }
         };
 
-        GUI.Label(new Rect(panelRect.x, panelRect.y + 32f, panelRect.width, 48f), "Home", titleStyle);
+        GUI.Label(new Rect(panelRect.x, panelRect.y + 32f, panelRect.width, 48f), "Guild Hall", titleStyle);
         GUI.Label(
             new Rect(panelRect.x + 48f, panelRect.y + 96f, panelRect.width - 96f, 72f),
-            "Prepare a run, review your current progress, and start the next challenge.",
+            "Prepare your scroll, choose a rival, and begin a trial of thought.",
             bodyStyle);
 
-        if (GUI.Button(new Rect(panelRect.x + 180f, panelRect.y + 190f, 200f, 42f), "Begin Run"))
+        if (GUI.Button(new Rect(panelRect.x + 180f, panelRect.y + 190f, 200f, 42f), "Begin Quest"))
         {
             TryLoadThemeInputScene();
         }
 
-        if (GUI.Button(new Rect(panelRect.x + 180f, panelRect.y + 244f, 200f, 36f), "Back to Title"))
+        if (GUI.Button(new Rect(panelRect.x + 180f, panelRect.y + 244f, 200f, 36f), "Back to Gate"))
         {
             SceneManager.LoadScene(titleSceneName);
         }

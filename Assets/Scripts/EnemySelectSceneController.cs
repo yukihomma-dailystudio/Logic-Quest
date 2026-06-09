@@ -10,12 +10,12 @@ public sealed class EnemySelectSceneController : MonoBehaviour
 
     private readonly EnemyOption[] enemies =
     {
-        new EnemyOption("Beginner Slime", "Checks whether the idea is easy to explain."),
-        new EnemyOption("Logic Knight", "Looks for weak reasons, contradictions, and missing proof."),
-        new EnemyOption("Realist Merchant", "Tests practicality, demand, and whether people keep using it."),
-        new EnemyOption("Harsh Reviewer", "Points out friction, drop-off risks, and user complaints."),
-        new EnemyOption("Ethics Guardian", "Checks safety, misunderstanding risks, and harmful wording."),
-        new EnemyOption("Cold Investor", "Challenges growth, differentiation, and the strongest reason to win.")
+        new EnemyOption("Beginner Slime", "A lowland creature that tests whether the claim is plain enough."),
+        new EnemyOption("Logic Knight", "An armored duelist who searches for weak reasons and contradictions."),
+        new EnemyOption("Realist Merchant", "A market tactician who weighs demand, cost, and repeat use."),
+        new EnemyOption("Harsh Reviewer", "A stern court critic who points out friction and drop-off risks."),
+        new EnemyOption("Ethics Guardian", "A temple sentinel who checks safety, misuse, and harmful wording."),
+        new EnemyOption("Cold Investor", "A treasury lord who challenges growth, advantage, and winning odds.")
     };
 
     private int selectedEnemyIndex;
@@ -36,7 +36,7 @@ public sealed class EnemySelectSceneController : MonoBehaviour
     private void DrawBackground()
     {
         var previousColor = GUI.color;
-        GUI.color = new Color(0.12f, 0.12f, 0.16f, 1f);
+        GUI.color = new Color(0.09f, 0.08f, 0.07f, 1f);
         GUI.DrawTexture(new Rect(0f, 0f, Screen.width, Screen.height), Texture2D.whiteTexture);
         GUI.color = previousColor;
     }
@@ -53,7 +53,7 @@ public sealed class EnemySelectSceneController : MonoBehaviour
             panelHeight);
 
         var previousColor = GUI.color;
-        GUI.color = new Color(0.95f, 0.95f, 0.98f, 1f);
+        GUI.color = new Color(0.82f, 0.74f, 0.56f, 1f);
         GUI.Box(panelRect, GUIContent.none);
         GUI.color = previousColor;
 
@@ -62,7 +62,7 @@ public sealed class EnemySelectSceneController : MonoBehaviour
             alignment = TextAnchor.MiddleCenter,
             fontSize = 32,
             fontStyle = FontStyle.Bold,
-            normal = { textColor = new Color(0.16f, 0.16f, 0.24f) }
+            normal = { textColor = new Color(0.2f, 0.11f, 0.05f) }
         };
 
         var bodyStyle = new GUIStyle(GUI.skin.label)
@@ -70,7 +70,7 @@ public sealed class EnemySelectSceneController : MonoBehaviour
             alignment = TextAnchor.MiddleCenter,
             fontSize = 15,
             wordWrap = true,
-            normal = { textColor = new Color(0.28f, 0.28f, 0.36f) }
+            normal = { textColor = new Color(0.25f, 0.17f, 0.09f) }
         };
 
         var selectedStyle = new GUIStyle(GUI.skin.label)
@@ -79,7 +79,7 @@ public sealed class EnemySelectSceneController : MonoBehaviour
             fontSize = 16,
             fontStyle = FontStyle.Bold,
             wordWrap = true,
-            normal = { textColor = new Color(0.18f, 0.28f, 0.48f) }
+            normal = { textColor = new Color(0.24f, 0.12f, 0.05f) }
         };
 
         var messageStyle = new GUIStyle(GUI.skin.label)
@@ -90,10 +90,10 @@ public sealed class EnemySelectSceneController : MonoBehaviour
             normal = { textColor = new Color(0.55f, 0.2f, 0.16f) }
         };
 
-        GUI.Label(new Rect(panelRect.x, panelRect.y + 26f, panelRect.width, 42f), "Choose Enemy", titleStyle);
+        GUI.Label(new Rect(panelRect.x, panelRect.y + 26f, panelRect.width, 42f), "Choose Foe", titleStyle);
         GUI.Label(
             new Rect(panelRect.x + 58f, panelRect.y + 78f, panelRect.width - 116f, 42f),
-            "Pick the kind of challenge you want for this theme.",
+            "Select the rival who will test your scroll in the arena.",
             bodyStyle);
 
         for (var i = 0; i < enemies.Length; i++)
@@ -123,7 +123,7 @@ public sealed class EnemySelectSceneController : MonoBehaviour
             SceneManager.LoadScene(themeInputSceneName);
         }
 
-        if (GUI.Button(new Rect(panelRect.x + 406f, panelRect.y + 440f, 140f, 38f), "Start Battle"))
+        if (GUI.Button(new Rect(panelRect.x + 406f, panelRect.y + 440f, 140f, 38f), "Enter Arena"))
         {
             TryStartBattle();
         }
