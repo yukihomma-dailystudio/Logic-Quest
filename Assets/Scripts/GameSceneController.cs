@@ -4,6 +4,7 @@ using UnityEngine.SceneManagement;
 public sealed class GameSceneController : MonoBehaviour
 {
     [SerializeField] private string homeSceneName = "HomeScene";
+    [SerializeField] private string resultSceneName = "ResultScene";
 
     private readonly string[] responses =
     {
@@ -123,6 +124,11 @@ public sealed class GameSceneController : MonoBehaviour
                 new Rect(contentX, panelRect.y + 424f, contentWidth, 28f),
                 $"{awardedAbility} EXP +20 を獲得しました。ギルドで記録を確認できます。",
                 resultStyle);
+
+            if (GUI.Button(new Rect(panelRect.x + 486f, panelRect.y + 24f, 190f, 32f), "戦果を確認"))
+            {
+                TryLoadResultScene();
+            }
         }
 
         if (GUI.Button(new Rect(panelRect.x + 24f, panelRect.y + 24f, 110f, 32f), "ギルド"))
@@ -177,6 +183,21 @@ public sealed class GameSceneController : MonoBehaviour
         }
 
         UserDataManager.AddExp(20, awardedAbility);
+        PlayerPrefs.SetString(ResultSceneController.LastAwardedAbilityKey, awardedAbility);
+        PlayerPrefs.SetInt(ResultSceneController.LastAwardedExpKey, 20);
+        PlayerPrefs.Save();
         rewardClaimed = true;
+    }
+
+    private void TryLoadResultScene()
+    {
+        if (Application.CanStreamedLevelBeLoaded(resultSceneName))
+        {
+            SceneManager.LoadScene(resultSceneName);
+            return;
+        }
+
+        SceneManager.LoadScene(homeSceneName);
+        Debug.LogWarning($"Scene '{resultSceneName}' is not available yet.");
     }
 }
