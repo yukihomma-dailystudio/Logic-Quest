@@ -4,9 +4,9 @@ using UnityEngine.SceneManagement;
 public sealed class HomeSceneController : MonoBehaviour
 {
     [SerializeField] private string titleSceneName = "TitleScene";
-    [SerializeField] private string gameSceneName = "GameScene";
+    [SerializeField] private string themeInputSceneName = "ThemeInputScene";
 
-    private bool showMissingGameSceneMessage;
+    private bool showMissingThemeInputSceneMessage;
 
     private void OnGUI()
     {
@@ -70,7 +70,7 @@ public sealed class HomeSceneController : MonoBehaviour
 
         if (GUI.Button(new Rect(panelRect.x + 180f, panelRect.y + 190f, 200f, 42f), "Begin Run"))
         {
-            TryLoadGameScene();
+            TryLoadThemeInputScene();
         }
 
         if (GUI.Button(new Rect(panelRect.x + 180f, panelRect.y + 244f, 200f, 36f), "Back to Title"))
@@ -78,24 +78,24 @@ public sealed class HomeSceneController : MonoBehaviour
             SceneManager.LoadScene(titleSceneName);
         }
 
-        if (showMissingGameSceneMessage)
+        if (showMissingThemeInputSceneMessage)
         {
             GUI.Label(
                 new Rect(panelRect.x + 48f, panelRect.y + 298f, panelRect.width - 96f, 42f),
-                "GameScene is not added yet. This button is reserved for Phase 1-2.",
+                "ThemeInputScene is not added yet. This button is reserved for the next prototype step.",
                 messageStyle);
         }
     }
 
-    private void TryLoadGameScene()
+    private void TryLoadThemeInputScene()
     {
-        if (Application.CanStreamedLevelBeLoaded(gameSceneName))
+        if (Application.CanStreamedLevelBeLoaded(themeInputSceneName))
         {
-            SceneManager.LoadScene(gameSceneName);
+            SceneManager.LoadScene(themeInputSceneName);
             return;
         }
 
-        showMissingGameSceneMessage = true;
-        Debug.LogWarning($"Scene '{gameSceneName}' is not available yet.");
+        showMissingThemeInputSceneMessage = true;
+        Debug.LogWarning($"Scene '{themeInputSceneName}' is not available yet.");
     }
 }

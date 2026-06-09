@@ -12,6 +12,9 @@ EditorBuildSettings:
     path: Assets/Scenes/HomeScene.unity
     guid: 4f4d64b2a84d47d4a5e0f66e8ca69590
   - enabled: 1
+    path: Assets/Scenes/ThemeInputScene.unity
+    guid: 361e55eba9d34a70a65bd0cc1531ffad
+  - enabled: 1
     path: Assets/Scenes/GameScene.unity
     guid: f219f9e0cb3b486db2bb8f410efda166
   m_configObjects: {}

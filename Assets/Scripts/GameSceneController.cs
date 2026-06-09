@@ -12,7 +12,13 @@ public sealed class GameSceneController : MonoBehaviour
         "Concede the weak point and revise the idea."
     };
 
+    private string selectedTheme = "A short daily thinking quest";
     private int selectedResponse = -1;
+
+    private void Start()
+    {
+        selectedTheme = PlayerPrefs.GetString(ThemeInputSceneController.LastThemeKey, selectedTheme);
+    }
 
     private void OnGUI()
     {
@@ -84,7 +90,7 @@ public sealed class GameSceneController : MonoBehaviour
         GUI.Label(new Rect(contentX, panelRect.y + 88f, contentWidth, 24f), "Claim", sectionStyle);
         GUI.Label(
             new Rect(contentX, panelRect.y + 116f, contentWidth, 52f),
-            "A short daily thinking quest will make it easier to sharpen ideas over time.",
+            selectedTheme,
             bodyStyle);
 
         GUI.Label(new Rect(contentX, panelRect.y + 178f, contentWidth, 24f), "Enemy Objection", sectionStyle);
