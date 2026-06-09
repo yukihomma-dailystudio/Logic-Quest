@@ -13,11 +13,15 @@ public sealed class GameSceneController : MonoBehaviour
     };
 
     private string selectedTheme = "A short daily thinking quest";
+    private string selectedEnemy = "Beginner Slime";
+    private string enemyObjection = "Can you explain this idea in one simple sentence?";
     private int selectedResponse = -1;
 
     private void Start()
     {
         selectedTheme = PlayerPrefs.GetString(ThemeInputSceneController.LastThemeKey, selectedTheme);
+        selectedEnemy = PlayerPrefs.GetString(EnemySelectSceneController.LastEnemyKey, selectedEnemy);
+        enemyObjection = GetEnemyObjection(selectedEnemy);
     }
 
     private void OnGUI()
@@ -93,10 +97,10 @@ public sealed class GameSceneController : MonoBehaviour
             selectedTheme,
             bodyStyle);
 
-        GUI.Label(new Rect(contentX, panelRect.y + 178f, contentWidth, 24f), "Enemy Objection", sectionStyle);
+        GUI.Label(new Rect(contentX, panelRect.y + 178f, contentWidth, 24f), selectedEnemy, sectionStyle);
         GUI.Label(
             new Rect(contentX, panelRect.y + 206f, contentWidth, 52f),
-            "People will stop using it unless every session immediately feels valuable.",
+            enemyObjection,
             bodyStyle);
 
         GUI.Label(new Rect(contentX, panelRect.y + 268f, contentWidth, 24f), "Choose a response", sectionStyle);
@@ -120,6 +124,25 @@ public sealed class GameSceneController : MonoBehaviour
         if (GUI.Button(new Rect(panelRect.x + 24f, panelRect.y + 24f, 110f, 32f), "Home"))
         {
             SceneManager.LoadScene(homeSceneName);
+        }
+    }
+
+    private string GetEnemyObjection(string enemyName)
+    {
+        switch (enemyName)
+        {
+            case "Logic Knight":
+                return "What is the strongest reason this claim should be true?";
+            case "Realist Merchant":
+                return "Who would use this repeatedly, and why would they come back?";
+            case "Harsh Reviewer":
+                return "Where will users feel friction or stop before the habit forms?";
+            case "Ethics Guardian":
+                return "Could this idea be misunderstood or used in a harmful way?";
+            case "Cold Investor":
+                return "What makes this different enough to win against existing options?";
+            default:
+                return "Can you explain this idea in one simple sentence?";
         }
     }
 }

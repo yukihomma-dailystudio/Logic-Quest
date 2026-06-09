@@ -6,11 +6,11 @@ public sealed class ThemeInputSceneController : MonoBehaviour
     public const string LastThemeKey = "ThinQuest.LastTheme";
 
     [SerializeField] private string homeSceneName = "HomeScene";
-    [SerializeField] private string gameSceneName = "GameScene";
+    [SerializeField] private string enemySelectSceneName = "EnemySelectScene";
 
     private string themeText = "A short daily thinking quest";
     private bool showMissingThemeMessage;
-    private bool showMissingGameSceneMessage;
+    private bool showMissingEnemySelectSceneMessage;
 
     private void Start()
     {
@@ -80,7 +80,7 @@ public sealed class ThemeInputSceneController : MonoBehaviour
         GUI.Label(new Rect(panelRect.x, panelRect.y + 30f, panelRect.width, 44f), "Theme", titleStyle);
         GUI.Label(
             new Rect(panelRect.x + 54f, panelRect.y + 92f, panelRect.width - 108f, 48f),
-            "Write the idea you want to defend. The enemy will challenge this claim in the next scene.",
+            "Write the idea you want to defend. Next, choose the enemy who will challenge it.",
             bodyStyle);
 
         GUI.SetNextControlName("ThemeInput");
@@ -95,9 +95,9 @@ public sealed class ThemeInputSceneController : MonoBehaviour
             SceneManager.LoadScene(homeSceneName);
         }
 
-        if (GUI.Button(new Rect(panelRect.x + 330f, panelRect.y + 282f, 140f, 40f), "Start Battle"))
+        if (GUI.Button(new Rect(panelRect.x + 330f, panelRect.y + 282f, 140f, 40f), "Choose Enemy"))
         {
-            TryStartBattle();
+            TryChooseEnemy();
         }
 
         if (showMissingThemeMessage)
@@ -108,20 +108,20 @@ public sealed class ThemeInputSceneController : MonoBehaviour
                 messageStyle);
         }
 
-        if (showMissingGameSceneMessage)
+        if (showMissingEnemySelectSceneMessage)
         {
             GUI.Label(
                 new Rect(panelRect.x + 70f, panelRect.y + 344f, panelRect.width - 140f, 40f),
-                "GameScene is not added yet. The battle button will connect automatically.",
+                "EnemySelectScene is not added yet. The battle flow will connect automatically.",
                 messageStyle);
         }
     }
 
-    private void TryStartBattle()
+    private void TryChooseEnemy()
     {
         themeText = themeText.Trim();
         showMissingThemeMessage = string.IsNullOrEmpty(themeText);
-        showMissingGameSceneMessage = false;
+        showMissingEnemySelectSceneMessage = false;
 
         if (showMissingThemeMessage)
         {
@@ -131,13 +131,13 @@ public sealed class ThemeInputSceneController : MonoBehaviour
         PlayerPrefs.SetString(LastThemeKey, themeText);
         PlayerPrefs.Save();
 
-        if (Application.CanStreamedLevelBeLoaded(gameSceneName))
+        if (Application.CanStreamedLevelBeLoaded(enemySelectSceneName))
         {
-            SceneManager.LoadScene(gameSceneName);
+            SceneManager.LoadScene(enemySelectSceneName);
             return;
         }
 
-        showMissingGameSceneMessage = true;
-        Debug.LogWarning($"Scene '{gameSceneName}' is not available yet.");
+        showMissingEnemySelectSceneMessage = true;
+        Debug.LogWarning($"Scene '{enemySelectSceneName}' is not available yet.");
     }
 }
