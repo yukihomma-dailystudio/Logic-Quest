@@ -16,12 +16,15 @@ public sealed class GameSceneController : MonoBehaviour
     private string selectedEnemy = "見習いスライム";
     private string enemyObjection = "この主張を一文でわかりやすく説明できますか？";
     private int selectedResponse = -1;
+    private bool rewardClaimed;
+    private string awardedAbility = "説明力";
 
     private void Start()
     {
         selectedTheme = PlayerPrefs.GetString(ThemeInputSceneController.LastThemeKey, selectedTheme);
         selectedEnemy = PlayerPrefs.GetString(EnemySelectSceneController.LastEnemyKey, selectedEnemy);
         enemyObjection = GetEnemyObjection(selectedEnemy);
+        awardedAbility = GetAwardedAbility(selectedEnemy);
     }
 
     private void OnGUI()
@@ -110,6 +113,7 @@ public sealed class GameSceneController : MonoBehaviour
             if (GUI.Button(new Rect(contentX, panelRect.y + 302f + i * 42f, contentWidth, 34f), responses[i]))
             {
                 selectedResponse = i;
+                ClaimReward();
             }
         }
 
@@ -117,7 +121,7 @@ public sealed class GameSceneController : MonoBehaviour
         {
             GUI.Label(
                 new Rect(contentX, panelRect.y + 424f, contentWidth, 28f),
-                "返答を誓いました。次の段階でEXPとランク進行を追加します。",
+                $"{awardedAbility} EXP +20 を獲得しました。ギルドで記録を確認できます。",
                 resultStyle);
         }
 
@@ -144,5 +148,35 @@ public sealed class GameSceneController : MonoBehaviour
             default:
                 return "この主張を一文でわかりやすく説明できますか？";
         }
+    }
+
+    private string GetAwardedAbility(string enemyName)
+    {
+        switch (enemyName)
+        {
+            case "論理の騎士":
+                return "論理力";
+            case "現実商人":
+                return "具体化力";
+            case "辛口審査官":
+                return "反論耐性";
+            case "倫理の守護者":
+                return "視点切替力";
+            case "冷徹な投資卿":
+                return "要約力";
+            default:
+                return "説明力";
+        }
+    }
+
+    private void ClaimReward()
+    {
+        if (rewardClaimed)
+        {
+            return;
+        }
+
+        UserDataManager.AddExp(20, awardedAbility);
+        rewardClaimed = true;
     }
 }
