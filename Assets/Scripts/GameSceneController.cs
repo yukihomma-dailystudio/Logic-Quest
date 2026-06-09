@@ -7,14 +7,14 @@ public sealed class GameSceneController : MonoBehaviour
 
     private readonly string[] responses =
     {
-        "Clarify the claim on the scroll.",
-        "Answer with a stronger supporting reason.",
-        "Concede the weak point and forge a better claim."
+        "巻物の主張をもっと明確にする。",
+        "より強い根拠で答える。",
+        "弱点を認めて、主張を鍛え直す。"
     };
 
-    private string selectedTheme = "A short daily thinking quest";
-    private string selectedEnemy = "Beginner Slime";
-    private string enemyObjection = "Can you explain this idea in one simple sentence?";
+    private string selectedTheme = "毎日少しずつ考えを鍛えるクエスト";
+    private string selectedEnemy = "見習いスライム";
+    private string enemyObjection = "この主張を一文でわかりやすく説明できますか？";
     private int selectedResponse = -1;
 
     private void Start()
@@ -86,12 +86,12 @@ public sealed class GameSceneController : MonoBehaviour
             normal = { textColor = new Color(0.18f, 0.29f, 0.14f) }
         };
 
-        GUI.Label(new Rect(panelRect.x, panelRect.y + 26f, panelRect.width, 42f), "Trial 1", titleStyle);
+        GUI.Label(new Rect(panelRect.x, panelRect.y + 26f, panelRect.width, 42f), "第一の試練", titleStyle);
 
         var contentX = panelRect.x + 48f;
         var contentWidth = panelRect.width - 96f;
 
-        GUI.Label(new Rect(contentX, panelRect.y + 88f, contentWidth, 24f), "Quest Scroll", sectionStyle);
+        GUI.Label(new Rect(contentX, panelRect.y + 88f, contentWidth, 24f), "クエストの巻物", sectionStyle);
         GUI.Label(
             new Rect(contentX, panelRect.y + 116f, contentWidth, 52f),
             selectedTheme,
@@ -103,7 +103,7 @@ public sealed class GameSceneController : MonoBehaviour
             enemyObjection,
             bodyStyle);
 
-        GUI.Label(new Rect(contentX, panelRect.y + 268f, contentWidth, 24f), "Choose a reply", sectionStyle);
+        GUI.Label(new Rect(contentX, panelRect.y + 268f, contentWidth, 24f), "返答を選ぶ", sectionStyle);
 
         for (var i = 0; i < responses.Length; i++)
         {
@@ -117,11 +117,11 @@ public sealed class GameSceneController : MonoBehaviour
         {
             GUI.Label(
                 new Rect(contentX, panelRect.y + 424f, contentWidth, 28f),
-                "Reply sworn. A later phase will award EXP and rank progress.",
+                "返答を誓いました。次の段階でEXPとランク進行を追加します。",
                 resultStyle);
         }
 
-        if (GUI.Button(new Rect(panelRect.x + 24f, panelRect.y + 24f, 110f, 32f), "Guild"))
+        if (GUI.Button(new Rect(panelRect.x + 24f, panelRect.y + 24f, 110f, 32f), "ギルド"))
         {
             SceneManager.LoadScene(homeSceneName);
         }
@@ -131,18 +131,18 @@ public sealed class GameSceneController : MonoBehaviour
     {
         switch (enemyName)
         {
-            case "Logic Knight":
-                return "What is the strongest proof that this claim should stand?";
-            case "Realist Merchant":
-                return "Who would return to this market stall, and why would they pay attention again?";
-            case "Harsh Reviewer":
-                return "Where will travelers tire of this path before the habit forms?";
-            case "Ethics Guardian":
-                return "Could this spell be misunderstood or turned toward harmful use?";
-            case "Cold Investor":
-                return "What makes this banner strong enough to win against rival houses?";
+            case "論理の騎士":
+                return "この主張が成り立つと言える、いちばん強い根拠は何ですか？";
+            case "現実商人":
+                return "誰がこの市場の屋台に戻ってきますか？また、なぜ再び関心を持つのですか？";
+            case "辛口審査官":
+                return "旅人はどこで面倒になり、習慣になる前に足を止めそうですか？";
+            case "倫理の守護者":
+                return "この術は誤解されたり、危ない使われ方をしたりしませんか？";
+            case "冷徹な投資卿":
+                return "この旗印は、競合する家門に勝てるほど強い違いを持っていますか？";
             default:
-                return "Can you explain this claim in one plain sentence?";
+                return "この主張を一文でわかりやすく説明できますか？";
         }
     }
 }

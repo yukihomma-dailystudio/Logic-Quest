@@ -62,18 +62,18 @@ public sealed class HomeSceneController : MonoBehaviour
             normal = { textColor = new Color(0.55f, 0.22f, 0.16f) }
         };
 
-        GUI.Label(new Rect(panelRect.x, panelRect.y + 32f, panelRect.width, 48f), "Guild Hall", titleStyle);
+        GUI.Label(new Rect(panelRect.x, panelRect.y + 32f, panelRect.width, 48f), "ギルドホール", titleStyle);
         GUI.Label(
             new Rect(panelRect.x + 48f, panelRect.y + 96f, panelRect.width - 96f, 72f),
-            "Prepare your scroll, choose a rival, and begin a trial of thought.",
+            "巻物に主張を記し、挑戦者を選び、思考の試練へ向かいましょう。",
             bodyStyle);
 
-        if (GUI.Button(new Rect(panelRect.x + 180f, panelRect.y + 190f, 200f, 42f), "Begin Quest"))
+        if (GUI.Button(new Rect(panelRect.x + 180f, panelRect.y + 190f, 200f, 42f), "クエスト開始"))
         {
             TryLoadThemeInputScene();
         }
 
-        if (GUI.Button(new Rect(panelRect.x + 180f, panelRect.y + 244f, 200f, 36f), "Back to Gate"))
+        if (GUI.Button(new Rect(panelRect.x + 180f, panelRect.y + 244f, 200f, 36f), "門へ戻る"))
         {
             SceneManager.LoadScene(titleSceneName);
         }
@@ -82,7 +82,7 @@ public sealed class HomeSceneController : MonoBehaviour
         {
             GUI.Label(
                 new Rect(panelRect.x + 48f, panelRect.y + 298f, panelRect.width - 96f, 42f),
-                "ThemeInputScene is not added yet. This button is reserved for the next prototype step.",
+                "ThemeInputScene がまだ登録されていません。次の試作段階でつながります。",
                 messageStyle);
         }
     }

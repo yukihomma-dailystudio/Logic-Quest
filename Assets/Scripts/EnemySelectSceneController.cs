@@ -10,12 +10,12 @@ public sealed class EnemySelectSceneController : MonoBehaviour
 
     private readonly EnemyOption[] enemies =
     {
-        new EnemyOption("Beginner Slime", "A lowland creature that tests whether the claim is plain enough."),
-        new EnemyOption("Logic Knight", "An armored duelist who searches for weak reasons and contradictions."),
-        new EnemyOption("Realist Merchant", "A market tactician who weighs demand, cost, and repeat use."),
-        new EnemyOption("Harsh Reviewer", "A stern court critic who points out friction and drop-off risks."),
-        new EnemyOption("Ethics Guardian", "A temple sentinel who checks safety, misuse, and harmful wording."),
-        new EnemyOption("Cold Investor", "A treasury lord who challenges growth, advantage, and winning odds.")
+        new EnemyOption("見習いスライム", "主張がわかりやすく説明できているかを試す低地の魔物。"),
+        new EnemyOption("論理の騎士", "理由の弱さ、矛盾、根拠不足を見抜く鎧の決闘者。"),
+        new EnemyOption("現実商人", "需要、手間、継続して使われる理由を測る市場の策士。"),
+        new EnemyOption("辛口審査官", "使いにくさ、離脱しそうな点、不満の種を指摘する宮廷批評家。"),
+        new EnemyOption("倫理の守護者", "誤解、悪用、安全でない表現を見張る神殿の番人。"),
+        new EnemyOption("冷徹な投資卿", "成長性、差別化、勝ち筋を問いただす宝物庫の領主。")
     };
 
     private int selectedEnemyIndex;
@@ -90,10 +90,10 @@ public sealed class EnemySelectSceneController : MonoBehaviour
             normal = { textColor = new Color(0.55f, 0.2f, 0.16f) }
         };
 
-        GUI.Label(new Rect(panelRect.x, panelRect.y + 26f, panelRect.width, 42f), "Choose Foe", titleStyle);
+        GUI.Label(new Rect(panelRect.x, panelRect.y + 26f, panelRect.width, 42f), "挑戦者を選ぶ", titleStyle);
         GUI.Label(
             new Rect(panelRect.x + 58f, panelRect.y + 78f, panelRect.width - 116f, 42f),
-            "Select the rival who will test your scroll in the arena.",
+            "闘技場であなたの巻物を試す相手を選びましょう。",
             bodyStyle);
 
         for (var i = 0; i < enemies.Length; i++)
@@ -118,12 +118,12 @@ public sealed class EnemySelectSceneController : MonoBehaviour
             $"{selectedEnemy.Name}: {selectedEnemy.Description}",
             selectedStyle);
 
-        if (GUI.Button(new Rect(panelRect.x + 214f, panelRect.y + 440f, 140f, 38f), "Back"))
+        if (GUI.Button(new Rect(panelRect.x + 214f, panelRect.y + 440f, 140f, 38f), "戻る"))
         {
             SceneManager.LoadScene(themeInputSceneName);
         }
 
-        if (GUI.Button(new Rect(panelRect.x + 406f, panelRect.y + 440f, 140f, 38f), "Enter Arena"))
+        if (GUI.Button(new Rect(panelRect.x + 406f, panelRect.y + 440f, 140f, 38f), "闘技場へ"))
         {
             TryStartBattle();
         }
@@ -132,7 +132,7 @@ public sealed class EnemySelectSceneController : MonoBehaviour
         {
             GUI.Label(
                 new Rect(panelRect.x + 78f, panelRect.y + 486f, panelRect.width - 156f, 24f),
-                "GameScene is not added yet. The battle button will connect automatically.",
+                "GameScene がまだ登録されていません。戦闘ボタンは自動でつながります。",
                 messageStyle);
         }
     }

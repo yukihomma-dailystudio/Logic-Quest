@@ -8,7 +8,7 @@ public sealed class ThemeInputSceneController : MonoBehaviour
     [SerializeField] private string homeSceneName = "HomeScene";
     [SerializeField] private string enemySelectSceneName = "EnemySelectScene";
 
-    private string themeText = "A short daily thinking quest";
+    private string themeText = "毎日少しずつ考えを鍛えるクエスト";
     private bool showMissingThemeMessage;
     private bool showMissingEnemySelectSceneMessage;
 
@@ -77,10 +77,10 @@ public sealed class ThemeInputSceneController : MonoBehaviour
             normal = { textColor = new Color(0.55f, 0.2f, 0.16f) }
         };
 
-        GUI.Label(new Rect(panelRect.x, panelRect.y + 30f, panelRect.width, 44f), "Quest Scroll", titleStyle);
+        GUI.Label(new Rect(panelRect.x, panelRect.y + 30f, panelRect.width, 44f), "クエストの巻物", titleStyle);
         GUI.Label(
             new Rect(panelRect.x + 54f, panelRect.y + 92f, panelRect.width - 108f, 48f),
-            "Write the claim you will carry into the hall. Next, choose the foe who will test it.",
+            "試練に持ち込む主張を書きましょう。次に、その主張を試す相手を選びます。",
             bodyStyle);
 
         GUI.SetNextControlName("ThemeInput");
@@ -90,12 +90,12 @@ public sealed class ThemeInputSceneController : MonoBehaviour
             180,
             inputStyle);
 
-        if (GUI.Button(new Rect(panelRect.x + 170f, panelRect.y + 282f, 140f, 40f), "Back"))
+        if (GUI.Button(new Rect(panelRect.x + 170f, panelRect.y + 282f, 140f, 40f), "戻る"))
         {
             SceneManager.LoadScene(homeSceneName);
         }
 
-        if (GUI.Button(new Rect(panelRect.x + 330f, panelRect.y + 282f, 140f, 40f), "Choose Foe"))
+        if (GUI.Button(new Rect(panelRect.x + 330f, panelRect.y + 282f, 140f, 40f), "相手を選ぶ"))
         {
             TryChooseEnemy();
         }
@@ -104,7 +104,7 @@ public sealed class ThemeInputSceneController : MonoBehaviour
         {
             GUI.Label(
                 new Rect(panelRect.x + 70f, panelRect.y + 344f, panelRect.width - 140f, 24f),
-                "Write a claim on the scroll before entering the trial.",
+                "試練に入る前に、巻物へ主張を書いてください。",
                 messageStyle);
         }
 
@@ -112,7 +112,7 @@ public sealed class ThemeInputSceneController : MonoBehaviour
         {
             GUI.Label(
                 new Rect(panelRect.x + 70f, panelRect.y + 344f, panelRect.width - 140f, 40f),
-                "EnemySelectScene is not added yet. The battle flow will connect automatically.",
+                "EnemySelectScene がまだ登録されていません。戦闘導線は自動でつながります。",
                 messageStyle);
         }
     }

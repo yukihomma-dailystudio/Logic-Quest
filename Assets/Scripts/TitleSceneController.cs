@@ -84,7 +84,7 @@ public sealed class TitleSceneController : MonoBehaviour
             FontStyle.Normal,
             TextAnchor.MiddleCenter,
             new Color(0.25f, 0.17f, 0.1f),
-            "Enter the guild hall, face rival minds, and temper your claim.");
+            "ギルドに入り、思考の試練で主張を鍛えよう。");
 
         startButton = CreateButton(
             panelTransform,
@@ -94,7 +94,7 @@ public sealed class TitleSceneController : MonoBehaviour
             new Vector2(0.5f, 0.5f),
             new Vector2(0f, -28f),
             new Vector2(200f, 42f),
-            "Enter Guild");
+            "ギルドへ入る");
 
         startButton.onClick.RemoveListener(HandleStartPressed);
         startButton.onClick.AddListener(HandleStartPressed);
@@ -111,7 +111,7 @@ public sealed class TitleSceneController : MonoBehaviour
             FontStyle.Normal,
             TextAnchor.MiddleCenter,
             new Color(0.45f, 0.11f, 0.06f),
-            "HomeScene is not added yet. Create the next scene and the Start button will connect automatically.");
+            "HomeScene がまだ登録されていません。次のシーンを作ると自動でつながります。");
 
         EnsureEventSystem();
     }
@@ -125,12 +125,12 @@ public sealed class TitleSceneController : MonoBehaviour
 
         if (subtitleText != null)
         {
-            subtitleText.text = "Enter the guild hall, face rival minds, and temper your claim.";
+            subtitleText.text = "ギルドに入り、思考の試練で主張を鍛えよう。";
         }
 
         if (messageText != null)
         {
-            messageText.text = "HomeScene is not added yet. Create the next scene and the Start button will connect automatically.";
+            messageText.text = "HomeScene がまだ登録されていません。次のシーンを作ると自動でつながります。";
             messageText.enabled = showMissingSceneMessage;
         }
     }
