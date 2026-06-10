@@ -5,6 +5,8 @@ public sealed class ResultSceneController : MonoBehaviour
 {
     public const string LastAwardedAbilityKey = "ThinQuest.LastAwardedAbility";
     public const string LastAwardedExpKey = "ThinQuest.LastAwardedExp";
+    public const string LastAnswerKey = "ThinQuest.LastAnswer";
+    public const string LastEvaluationKey = "ThinQuest.LastEvaluation";
 
     [SerializeField] private string homeSceneName = "HomeScene";
     [SerializeField] private string themeInputSceneName = "ThemeInputScene";
@@ -13,6 +15,8 @@ public sealed class ResultSceneController : MonoBehaviour
     private string selectedTheme = "まだ巻物はありません";
     private string selectedEnemy = "まだ挑戦者はいません";
     private string awardedAbility = "説明力";
+    private string answerText = "まだ返答はありません";
+    private string evaluationText = "評価はまだありません";
     private int awardedExp = 20;
 
     private void Start()
@@ -33,6 +37,8 @@ public sealed class ResultSceneController : MonoBehaviour
         selectedTheme = PlayerPrefs.GetString(ThemeInputSceneController.LastThemeKey, selectedTheme);
         selectedEnemy = PlayerPrefs.GetString(EnemySelectSceneController.LastEnemyKey, selectedEnemy);
         awardedAbility = PlayerPrefs.GetString(LastAwardedAbilityKey, awardedAbility);
+        answerText = PlayerPrefs.GetString(LastAnswerKey, answerText);
+        evaluationText = PlayerPrefs.GetString(LastEvaluationKey, evaluationText);
         awardedExp = PlayerPrefs.GetInt(LastAwardedExpKey, awardedExp);
     }
 
@@ -47,7 +53,7 @@ public sealed class ResultSceneController : MonoBehaviour
     private void DrawResultPanel()
     {
         const float panelWidth = 720f;
-        const float panelHeight = 500f;
+        const float panelHeight = 620f;
 
         var panelRect = new Rect(
             (Screen.width - panelWidth) * 0.5f,
@@ -104,23 +110,29 @@ public sealed class ResultSceneController : MonoBehaviour
         GUI.Label(new Rect(contentX, panelRect.y + 174f, contentWidth, 24f), "対峙した相手", sectionStyle);
         GUI.Label(new Rect(contentX, panelRect.y + 202f, contentWidth, 30f), selectedEnemy, bodyStyle);
 
+        GUI.Label(new Rect(contentX, panelRect.y + 244f, contentWidth, 24f), "あなたの返答", sectionStyle);
+        GUI.Label(new Rect(contentX, panelRect.y + 272f, contentWidth, 64f), answerText, bodyStyle);
+
+        GUI.Label(new Rect(contentX, panelRect.y + 346f, contentWidth, 24f), "試練の講評", sectionStyle);
+        GUI.Label(new Rect(contentX, panelRect.y + 374f, contentWidth, 64f), evaluationText, bodyStyle);
+
         GUI.Label(
-            new Rect(contentX, panelRect.y + 252f, contentWidth, 36f),
+            new Rect(contentX, panelRect.y + 452f, contentWidth, 36f),
             $"{awardedAbility} EXP +{awardedExp}",
             rewardStyle);
 
-        GUI.Label(new Rect(contentX, panelRect.y + 312f, contentWidth, 24f), "冒険者記録", sectionStyle);
+        GUI.Label(new Rect(contentX, panelRect.y + 500f, contentWidth, 24f), "冒険者記録", sectionStyle);
         GUI.Label(
-            new Rect(contentX, panelRect.y + 340f, contentWidth, 54f),
+            new Rect(contentX, panelRect.y + 528f, contentWidth, 54f),
             $"ランク: {profile.Level}\n累計EXP: {profile.TotalExp}\n完了した試練: {profile.BattlesCompleted}",
             bodyStyle);
 
-        if (GUI.Button(new Rect(panelRect.x + 190f, panelRect.y + 424f, 150f, 38f), "ギルドへ戻る"))
+        if (GUI.Button(new Rect(panelRect.x + 190f, panelRect.y + 580f, 150f, 32f), "ギルドへ戻る"))
         {
             SceneManager.LoadScene(homeSceneName);
         }
 
-        if (GUI.Button(new Rect(panelRect.x + 380f, panelRect.y + 424f, 150f, 38f), "次の巻物"))
+        if (GUI.Button(new Rect(panelRect.x + 380f, panelRect.y + 580f, 150f, 32f), "次の巻物"))
         {
             SceneManager.LoadScene(themeInputSceneName);
         }
