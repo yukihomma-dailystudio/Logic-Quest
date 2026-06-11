@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public sealed class GameSceneController : MonoBehaviour
+public sealed class BattleSceneController : MonoBehaviour
 {
     [SerializeField] private string homeSceneName = "HomeScene";
     [SerializeField] private string resultSceneName = "ResultScene";

@@ -18,7 +18,7 @@ EditorBuildSettings:
     path: Assets/Scenes/EnemySelectScene.unity
     guid: 196a3ba9dcc44b00b6afa52824d8ce3c
   - enabled: 1
-    path: Assets/Scenes/GameScene.unity
+    path: Assets/Scenes/BattleScene.unity
     guid: f219f9e0cb3b486db2bb8f410efda166
   - enabled: 1
     path: Assets/Scenes/ResultScene.unity

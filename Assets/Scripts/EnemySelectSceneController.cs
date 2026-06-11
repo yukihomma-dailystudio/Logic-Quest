@@ -6,7 +6,7 @@ public sealed class EnemySelectSceneController : MonoBehaviour
     public const string LastEnemyKey = "ThinQuest.LastEnemy";
 
     [SerializeField] private string themeInputSceneName = "ThemeInputScene";
-    [SerializeField] private string gameSceneName = "GameScene";
+    [SerializeField] private string battleSceneName = "BattleScene";
 
     private readonly EnemyOption[] enemies =
     {
@@ -19,7 +19,7 @@ public sealed class EnemySelectSceneController : MonoBehaviour
     };
 
     private int selectedEnemyIndex;
-    private bool showMissingGameSceneMessage;
+    private bool showMissingBattleSceneMessage;
 
     private void Start()
     {
@@ -148,11 +148,11 @@ public sealed class EnemySelectSceneController : MonoBehaviour
             TryStartBattle();
         }
 
-        if (showMissingGameSceneMessage)
+        if (showMissingBattleSceneMessage)
         {
             GUI.Label(
                 new Rect(panelRect.x + 88f, panelRect.y + 592f, panelRect.width - 176f, 24f),
-                "GameScene がまだ登録されていません。戦闘ボタンは自動でつながります。",
+                "BattleScene がまだ登録されていません。戦闘ボタンは自動でつながります。",
                 messageStyle);
         }
     }
@@ -192,14 +192,14 @@ public sealed class EnemySelectSceneController : MonoBehaviour
         PlayerPrefs.SetString(LastEnemyKey, enemies[selectedEnemyIndex].Name);
         PlayerPrefs.Save();
 
-        if (Application.CanStreamedLevelBeLoaded(gameSceneName))
+        if (Application.CanStreamedLevelBeLoaded(battleSceneName))
         {
-            SceneManager.LoadScene(gameSceneName);
+            SceneManager.LoadScene(battleSceneName);
             return;
         }
 
-        showMissingGameSceneMessage = true;
-        Debug.LogWarning($"Scene '{gameSceneName}' is not available yet.");
+        showMissingBattleSceneMessage = true;
+        Debug.LogWarning($"Scene '{battleSceneName}' is not available yet.");
     }
 
     private int FindEnemyIndex(string enemyName)
