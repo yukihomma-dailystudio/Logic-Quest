@@ -1,21 +1,17 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public sealed class GameSceneController : MonoBehaviour
+public sealed class BattleSceneController : MonoBehaviour
 {
     [SerializeField] private string homeSceneName = "HomeScene";
-
-    private readonly string[] responses =
-    {
-        "巻物の主張をもっと明確にする。",
-        "より強い根拠で答える。",
-        "弱点を認めて、主張を鍛え直す。"
-    };
+    [SerializeField] private string resultSceneName = "ResultScene";
 
     private string selectedTheme = "毎日少しずつ考えを鍛えるクエスト";
     private string selectedEnemy = "見習いスライム";
     private string enemyObjection = "この主張を一文でわかりやすく説明できますか？";
-    private int selectedResponse = -1;
+    private string answerText = "";
+    private string evaluationText = "";
+    private bool showMissingAnswerMessage;
     private bool rewardClaimed;
     private string awardedAbility = "説明力";
 
@@ -43,8 +39,8 @@ public sealed class GameSceneController : MonoBehaviour
 
     private void DrawGamePanel()
     {
-        const float panelWidth = 700f;
-        const float panelHeight = 480f;
+        const float panelWidth = 760f;
+        const float panelHeight = 560f;
 
         var panelRect = new Rect(
             (Screen.width - panelWidth) * 0.5f,
@@ -89,6 +85,20 @@ public sealed class GameSceneController : MonoBehaviour
             normal = { textColor = new Color(0.18f, 0.29f, 0.14f) }
         };
 
+        var inputStyle = new GUIStyle(GUI.skin.textArea)
+        {
+            fontSize = 15,
+            wordWrap = true
+        };
+
+        var messageStyle = new GUIStyle(GUI.skin.label)
+        {
+            alignment = TextAnchor.MiddleCenter,
+            fontSize = 14,
+            wordWrap = true,
+            normal = { textColor = new Color(0.55f, 0.2f, 0.16f) }
+        };
+
         GUI.Label(new Rect(panelRect.x, panelRect.y + 26f, panelRect.width, 42f), "第一の試練", titleStyle);
 
         var contentX = panelRect.x + 48f;
@@ -106,29 +116,98 @@ public sealed class GameSceneController : MonoBehaviour
             enemyObjection,
             bodyStyle);
 
-        GUI.Label(new Rect(contentX, panelRect.y + 268f, contentWidth, 24f), "返答を選ぶ", sectionStyle);
+        GUI.Label(new Rect(contentX, panelRect.y + 268f, contentWidth, 24f), "あなたの返答", sectionStyle);
 
-        for (var i = 0; i < responses.Length; i++)
+        if (!rewardClaimed)
         {
-            if (GUI.Button(new Rect(contentX, panelRect.y + 302f + i * 42f, contentWidth, 34f), responses[i]))
+            answerText = GUI.TextArea(
+                new Rect(contentX, panelRect.y + 300f, contentWidth, 96f),
+                answerText,
+                220,
+                inputStyle);
+
+            if (GUI.Button(new Rect(panelRect.x + 300f, panelRect.y + 414f, 160f, 38f), "返答する"))
             {
-                selectedResponse = i;
-                ClaimReward();
+                TrySubmitAnswer();
+            }
+
+            if (showMissingAnswerMessage)
+            {
+                GUI.Label(
+                    new Rect(contentX, panelRect.y + 462f, contentWidth, 24f),
+                    "敵に返す言葉を巻物へ書いてください。",
+                    messageStyle);
             }
         }
-
-        if (selectedResponse >= 0)
+        else
         {
+            GUI.Label(new Rect(contentX, panelRect.y + 300f, contentWidth, 70f), evaluationText, bodyStyle);
             GUI.Label(
-                new Rect(contentX, panelRect.y + 424f, contentWidth, 28f),
+                new Rect(contentX, panelRect.y + 402f, contentWidth, 28f),
                 $"{awardedAbility} EXP +20 を獲得しました。ギルドで記録を確認できます。",
                 resultStyle);
+
+            if (GUI.Button(new Rect(panelRect.x + 285f, panelRect.y + 450f, 190f, 38f), "戦果を確認"))
+            {
+                TryLoadResultScene();
+            }
         }
 
         if (GUI.Button(new Rect(panelRect.x + 24f, panelRect.y + 24f, 110f, 32f), "ギルド"))
         {
             SceneManager.LoadScene(homeSceneName);
         }
+    }
+
+    private void TrySubmitAnswer()
+    {
+        answerText = answerText.Trim();
+        showMissingAnswerMessage = string.IsNullOrEmpty(answerText);
+
+        if (showMissingAnswerMessage)
+        {
+            return;
+        }
+
+        evaluationText = BuildEvaluation(answerText);
+        ClaimReward();
+    }
+
+    private string BuildEvaluation(string answer)
+    {
+        var hasReason = ContainsAny(answer, "理由", "なぜ", "だから", "ため", "根拠");
+        var hasExample = ContainsAny(answer, "例えば", "たとえば", "具体", "例");
+        var isDetailed = answer.Length >= 45;
+
+        if (hasReason && hasExample && isDetailed)
+        {
+            return "根拠と具体例が入っているため、巻物の主張がかなり伝わりやすくなっています。次は、相手が疑いそうな点を先に補うとさらに強くなります。";
+        }
+
+        if (hasReason && isDetailed)
+        {
+            return "理由を添えて答えられています。説得力は出ていますが、具体例を一つ足すと、聞き手が場面を想像しやすくなります。";
+        }
+
+        if (hasExample)
+        {
+            return "具体例があるので、主張の姿は見えやすくなっています。次は、その例からなぜ主張が成り立つのかを一文で補いましょう。";
+        }
+
+        return "返答の方向は見えています。次は、理由や具体例を加えて、敵が突っ込みにくい形へ鍛え直しましょう。";
+    }
+
+    private static bool ContainsAny(string text, params string[] keywords)
+    {
+        for (var i = 0; i < keywords.Length; i++)
+        {
+            if (text.Contains(keywords[i]))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private string GetEnemyObjection(string enemyName)
@@ -177,6 +256,23 @@ public sealed class GameSceneController : MonoBehaviour
         }
 
         UserDataManager.AddExp(20, awardedAbility);
+        PlayerPrefs.SetString(ResultSceneController.LastAwardedAbilityKey, awardedAbility);
+        PlayerPrefs.SetInt(ResultSceneController.LastAwardedExpKey, 20);
+        PlayerPrefs.SetString(ResultSceneController.LastAnswerKey, answerText);
+        PlayerPrefs.SetString(ResultSceneController.LastEvaluationKey, evaluationText);
+        PlayerPrefs.Save();
         rewardClaimed = true;
+    }
+
+    private void TryLoadResultScene()
+    {
+        if (Application.CanStreamedLevelBeLoaded(resultSceneName))
+        {
+            SceneManager.LoadScene(resultSceneName);
+            return;
+        }
+
+        SceneManager.LoadScene(homeSceneName);
+        Debug.LogWarning($"Scene '{resultSceneName}' is not available yet.");
     }
 }
