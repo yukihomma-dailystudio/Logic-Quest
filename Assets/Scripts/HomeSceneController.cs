@@ -10,7 +10,12 @@ public sealed class HomeSceneController : MonoBehaviour
     private const string OverlayName = "Overlay";
     private const string StatusRootName = "StatusRoot";
     private const string NavigationRootName = "NavigationRoot";
-    private const string CharacterName = "ClarisseThinking";
+    private const string CharacterName = "ClarisseCharacter";
+    private static readonly string[] CharacterResourcePaths =
+    {
+        "Characters/ClarisseThinking",
+        "Characters/ClarisseNormal"
+    };
     private const string StartButtonName = "StartButton";
     private const string DailyHuntButtonName = "DailyHuntButton";
     private const string BackButtonName = "BackButton";
@@ -21,7 +26,7 @@ public sealed class HomeSceneController : MonoBehaviour
     [SerializeField] private string titleSceneName = "TitleScene";
     [SerializeField] private string themeInputSceneName = "ThemeInputScene";
     [SerializeField] private Texture2D guildHallBackground;
-    [SerializeField] private Texture2D clarisseThinkingCharacter;
+    [SerializeField] private Texture2D clarisseCharacter;
 
     private bool showMissingThemeInputSceneMessage;
     private UserProfile profile;
@@ -54,12 +59,12 @@ public sealed class HomeSceneController : MonoBehaviour
             guildHallBackground = Resources.Load<Texture2D>("Backgrounds/GuildHallHomeBackground");
         }
 
-        if (clarisseThinkingCharacter == null)
+        if (clarisseCharacter == null)
         {
-            clarisseThinkingCharacter = Resources.Load<Texture2D>("Characters/ClarisseThinking");
-            if (clarisseThinkingCharacter == null)
+            clarisseCharacter = LoadRandomCharacter();
+            if (clarisseCharacter == null)
             {
-                Debug.LogWarning("Character texture 'Resources/Characters/ClarisseThinking' could not be loaded.");
+                Debug.LogWarning("No Clarisse character textures could be loaded from Resources/Characters.");
             }
         }
     }
@@ -89,10 +94,29 @@ public sealed class HomeSceneController : MonoBehaviour
 
         characterImage = CreateRawImage(canvasTransform, CharacterName);
         ConfigureCharacterRect(characterImage.rectTransform);
-        characterImage.texture = clarisseThinkingCharacter;
+        characterImage.texture = clarisseCharacter;
         characterImage.color = Color.white;
         characterImage.raycastTarget = false;
         characterImage.transform.SetAsLastSibling();
+    }
+
+    private static Texture2D LoadRandomCharacter()
+    {
+        var startIndex = Random.Range(0, CharacterResourcePaths.Length);
+
+        for (var i = 0; i < CharacterResourcePaths.Length; i++)
+        {
+            var resourcePath = CharacterResourcePaths[(startIndex + i) % CharacterResourcePaths.Length];
+            var character = Resources.Load<Texture2D>(resourcePath);
+            if (character != null)
+            {
+                return character;
+            }
+
+            Debug.LogWarning($"Character texture 'Resources/{resourcePath}' could not be loaded.");
+        }
+
+        return null;
     }
 
     private void BuildStatusPanel(RectTransform statusRoot)
@@ -123,10 +147,16 @@ public sealed class HomeSceneController : MonoBehaviour
 
     private void BuildNavigationPanel(RectTransform navigationRoot)
     {
+        const float buttonY = 0.38f;
+        const float buttonWidth = 0.26f;
+        const float buttonHeight = 0.22f;
+        const float buttonGap = 0.04f;
+        const float firstButtonX = 0.07f;
+
         startButton = CreateTransparentButton(
             navigationRoot,
             StartButtonName,
-            new Rect(0.04f, 0.36f, 0.28f, 0.28f),
+            new Rect(firstButtonX, buttonY, buttonWidth, buttonHeight),
             "クエスト開始");
         startButton.onClick.RemoveListener(TryLoadThemeInputScene);
         startButton.onClick.AddListener(TryLoadThemeInputScene);
@@ -134,7 +164,7 @@ public sealed class HomeSceneController : MonoBehaviour
         dailyHuntButton = CreateTransparentButton(
             navigationRoot,
             DailyHuntButtonName,
-            new Rect(0.35f, 0.36f, 0.32f, 0.28f),
+            new Rect(firstButtonX + buttonWidth + buttonGap, buttonY, buttonWidth, buttonHeight),
             "本日の討伐依頼");
         dailyHuntButton.onClick.RemoveListener(TryLoadThemeInputScene);
         dailyHuntButton.onClick.AddListener(TryLoadThemeInputScene);
@@ -142,7 +172,7 @@ public sealed class HomeSceneController : MonoBehaviour
         backButton = CreateTransparentButton(
             navigationRoot,
             BackButtonName,
-            new Rect(0.70f, 0.36f, 0.26f, 0.28f),
+            new Rect(firstButtonX + (buttonWidth + buttonGap) * 2f, buttonY, buttonWidth, buttonHeight),
             "門へ戻る");
         backButton.onClick.RemoveListener(LoadTitleScene);
         backButton.onClick.AddListener(LoadTitleScene);
@@ -272,14 +302,14 @@ public sealed class HomeSceneController : MonoBehaviour
             buttonTransform,
             "Label",
             new Rect(0f, 0f, 1f, 1f),
-            30,
+            26,
             FontStyle.Bold,
             TextAnchor.MiddleCenter);
         labelText.text = label;
         labelText.color = new Color(0.24f, 0.13f, 0.06f);
         labelText.resizeTextForBestFit = true;
-        labelText.resizeTextMinSize = 18;
-        labelText.resizeTextMaxSize = 30;
+        labelText.resizeTextMinSize = 16;
+        labelText.resizeTextMaxSize = 26;
 
         return button;
     }
