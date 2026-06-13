@@ -163,7 +163,13 @@ public sealed class HomeSceneController : MonoBehaviour
 
     private static Texture2D LoadRandomCharacter()
     {
+        return LoadRandomCharacter(null);
+    }
+
+    private static Texture2D LoadRandomCharacter(Texture2D excludedCharacter)
+    {
         var startIndex = Random.Range(0, CharacterResourcePaths.Length);
+        Texture2D fallbackCharacter = null;
 
         for (var i = 0; i < CharacterResourcePaths.Length; i++)
         {
@@ -171,13 +177,23 @@ public sealed class HomeSceneController : MonoBehaviour
             var character = Resources.Load<Texture2D>(resourcePath);
             if (character != null)
             {
-                return character;
+                if (fallbackCharacter == null)
+                {
+                    fallbackCharacter = character;
+                }
+
+                if (character != excludedCharacter)
+                {
+                    return character;
+                }
+
+                continue;
             }
 
             Debug.LogWarning($"Character texture 'Resources/{resourcePath}' could not be loaded.");
         }
 
-        return null;
+        return fallbackCharacter;
     }
 
     private void BuildStatusPanel(RectTransform statusRoot)
@@ -658,6 +674,23 @@ public sealed class HomeSceneController : MonoBehaviour
         if (clarisseLineText != null)
         {
             clarisseLineText.text = line;
+        }
+
+        RefreshClarisseCharacter();
+    }
+
+    private void RefreshClarisseCharacter()
+    {
+        var nextCharacter = LoadRandomCharacter(clarisseCharacter);
+        if (nextCharacter == null)
+        {
+            return;
+        }
+
+        clarisseCharacter = nextCharacter;
+        if (characterImage != null)
+        {
+            characterImage.texture = clarisseCharacter;
         }
     }
 
