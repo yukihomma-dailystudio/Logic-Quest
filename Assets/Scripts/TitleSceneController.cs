@@ -232,8 +232,10 @@ public sealed class TitleSceneController : MonoBehaviour
     {
         var background = GetOrCreateChild(canvasTransform, BackgroundName);
         var rect = GetOrAddComponent<RectTransform>(background.gameObject);
-        rect.anchorMin = Vector2.zero;
-        rect.anchorMax = Vector2.one;
+        rect.anchorMin = new Vector2(0.5f, 0.5f);
+        rect.anchorMax = new Vector2(0.5f, 0.5f);
+        rect.pivot = new Vector2(0.5f, 0.5f);
+        rect.anchoredPosition = Vector2.zero;
         rect.offsetMin = Vector2.zero;
         rect.offsetMax = Vector2.zero;
 
@@ -241,13 +243,25 @@ public sealed class TitleSceneController : MonoBehaviour
         image.color = Color.white;
         image.sprite = Resources.Load<Sprite>(backgroundResourcePath);
         image.type = Image.Type.Simple;
-        image.preserveAspect = true;
+        image.preserveAspect = false;
         image.raycastTarget = false;
+
+        var aspectFitter = GetOrAddComponent<AspectRatioFitter>(background.gameObject);
+        aspectFitter.aspectMode = AspectRatioFitter.AspectMode.EnvelopeParent;
 
         if (image.sprite == null)
         {
             image.color = new Color(0.08f, 0.09f, 0.08f, 1f);
+            aspectFitter.enabled = false;
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.one;
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
+            return;
         }
+
+        aspectFitter.enabled = true;
+        aspectFitter.aspectRatio = image.sprite.rect.width / image.sprite.rect.height;
     }
 
     private Button CreateButton(
