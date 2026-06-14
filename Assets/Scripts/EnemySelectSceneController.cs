@@ -20,6 +20,11 @@ public sealed class EnemySelectSceneController : MonoBehaviour
 
     private int selectedEnemyIndex;
     private bool showMissingBattleSceneMessage;
+    private bool isSwipeTracking;
+    private Vector2 swipeStartPosition;
+
+    private const float MinSwipeDistance = 64f;
+    private const float MaxVerticalSwipeOffset = 96f;
 
     private void Start()
     {
@@ -31,6 +36,11 @@ public sealed class EnemySelectSceneController : MonoBehaviour
     {
         DrawBackground();
         DrawEnemyPanel();
+    }
+
+    private void Update()
+    {
+        HandleSwipeInput();
     }
 
     private void DrawBackground()
@@ -73,15 +83,6 @@ public sealed class EnemySelectSceneController : MonoBehaviour
             normal = { textColor = new Color(0.25f, 0.17f, 0.09f) }
         };
 
-        var selectedStyle = new GUIStyle(GUI.skin.label)
-        {
-            alignment = TextAnchor.MiddleCenter,
-            fontSize = 16,
-            fontStyle = FontStyle.Bold,
-            wordWrap = true,
-            normal = { textColor = new Color(0.24f, 0.12f, 0.05f) }
-        };
-
         var messageStyle = new GUIStyle(GUI.skin.label)
         {
             alignment = TextAnchor.MiddleCenter,
@@ -93,7 +94,7 @@ public sealed class EnemySelectSceneController : MonoBehaviour
         var enemyNameStyle = new GUIStyle(GUI.skin.label)
         {
             alignment = TextAnchor.MiddleCenter,
-            fontSize = 16,
+            fontSize = 24,
             fontStyle = FontStyle.Bold,
             wordWrap = true,
             normal = { textColor = new Color(0.22f, 0.12f, 0.06f) }
@@ -102,41 +103,66 @@ public sealed class EnemySelectSceneController : MonoBehaviour
         var portraitStyle = new GUIStyle(GUI.skin.label)
         {
             alignment = TextAnchor.MiddleCenter,
-            fontSize = 24,
+            fontSize = 36,
             fontStyle = FontStyle.Bold,
             wordWrap = true,
             normal = { textColor = new Color(0.92f, 0.84f, 0.64f) }
         };
 
+        var descriptionStyle = new GUIStyle(GUI.skin.label)
+        {
+            alignment = TextAnchor.MiddleCenter,
+            fontSize = 17,
+            fontStyle = FontStyle.Bold,
+            wordWrap = true,
+            normal = { textColor = new Color(0.24f, 0.12f, 0.05f) }
+        };
+
+        var hintStyle = new GUIStyle(GUI.skin.label)
+        {
+            alignment = TextAnchor.MiddleCenter,
+            fontSize = 13,
+            wordWrap = true,
+            normal = { textColor = new Color(0.34f, 0.22f, 0.12f) }
+        };
+
+        var counterStyle = new GUIStyle(GUI.skin.label)
+        {
+            alignment = TextAnchor.MiddleCenter,
+            fontSize = 15,
+            fontStyle = FontStyle.Bold,
+            normal = { textColor = new Color(0.31f, 0.18f, 0.08f) }
+        };
+
         GUI.Label(new Rect(panelRect.x, panelRect.y + 26f, panelRect.width, 42f), "挑戦者を選ぶ", titleStyle);
         GUI.Label(
             new Rect(panelRect.x + 58f, panelRect.y + 78f, panelRect.width - 116f, 42f),
-            "闘技場であなたの巻物を試す相手を選びましょう。",
+            "左右にスワイプして、闘技場であなたの巻物を試す相手を選びましょう。",
             bodyStyle);
 
-        for (var i = 0; i < enemies.Length; i++)
+        var selectedEnemy = enemies[selectedEnemyIndex];
+        var cardRect = new Rect(panelRect.x + 242f, panelRect.y + 134f, 376f, 318f);
+        DrawEnemyCard(cardRect, selectedEnemy, enemyNameStyle, portraitStyle, descriptionStyle);
+
+        GUI.Label(
+            new Rect(panelRect.x + 320f, panelRect.y + 462f, panelRect.width - 640f, 24f),
+            $"{selectedEnemyIndex + 1} / {enemies.Length}",
+            counterStyle);
+
+        GUI.Label(
+            new Rect(panelRect.x + 216f, panelRect.y + 490f, panelRect.width - 432f, 28f),
+            "左右スワイプで相手を切り替え",
+            hintStyle);
+
+        if (GUI.Button(new Rect(panelRect.x + 128f, panelRect.y + 274f, 72f, 54f), "←"))
         {
-            var column = i % 3;
-            var row = i / 3;
-            var cardRect = new Rect(
-                panelRect.x + 58f + column * 250f,
-                panelRect.y + 140f + row * 172f,
-                218f,
-                146f);
-
-            if (GUI.Button(cardRect, GUIContent.none))
-            {
-                selectedEnemyIndex = i;
-            }
-
-            DrawEnemyCard(cardRect, enemies[i], i == selectedEnemyIndex, enemyNameStyle, portraitStyle);
+            ChangeEnemy(-1);
         }
 
-        var selectedEnemy = enemies[selectedEnemyIndex];
-        GUI.Label(
-            new Rect(panelRect.x + 88f, panelRect.y + 492f, panelRect.width - 176f, 44f),
-            $"{selectedEnemy.Name}: {selectedEnemy.Description}",
-            selectedStyle);
+        if (GUI.Button(new Rect(panelRect.x + 660f, panelRect.y + 274f, 72f, 54f), "→"))
+        {
+            ChangeEnemy(1);
+        }
 
         if (GUI.Button(new Rect(panelRect.x + 264f, panelRect.y + 548f, 140f, 38f), "戻る"))
         {
@@ -160,31 +186,86 @@ public sealed class EnemySelectSceneController : MonoBehaviour
     private static void DrawEnemyCard(
         Rect cardRect,
         EnemyOption enemy,
-        bool isSelected,
         GUIStyle enemyNameStyle,
-        GUIStyle portraitStyle)
+        GUIStyle portraitStyle,
+        GUIStyle descriptionStyle)
     {
         var previousColor = GUI.color;
 
-        GUI.color = isSelected
-            ? new Color(0.93f, 0.82f, 0.54f, 1f)
-            : new Color(0.68f, 0.53f, 0.34f, 1f);
+        GUI.color = new Color(0.93f, 0.82f, 0.54f, 1f);
         GUI.DrawTexture(cardRect, Texture2D.whiteTexture);
 
-        var innerRect = new Rect(cardRect.x + 4f, cardRect.y + 4f, cardRect.width - 8f, cardRect.height - 8f);
+        var innerRect = new Rect(cardRect.x + 6f, cardRect.y + 6f, cardRect.width - 12f, cardRect.height - 12f);
         GUI.color = new Color(0.79f, 0.68f, 0.48f, 1f);
         GUI.DrawTexture(innerRect, Texture2D.whiteTexture);
 
-        var portraitRect = new Rect(cardRect.x + 18f, cardRect.y + 14f, cardRect.width - 36f, 86f);
+        var portraitRect = new Rect(cardRect.x + 34f, cardRect.y + 28f, cardRect.width - 68f, 156f);
         GUI.color = enemy.PortraitColor;
         GUI.DrawTexture(portraitRect, Texture2D.whiteTexture);
 
         GUI.color = new Color(0.12f, 0.08f, 0.05f, 0.22f);
-        GUI.DrawTexture(new Rect(portraitRect.x + 12f, portraitRect.y + 60f, portraitRect.width - 24f, 12f), Texture2D.whiteTexture);
+        GUI.DrawTexture(new Rect(portraitRect.x + 24f, portraitRect.y + 116f, portraitRect.width - 48f, 18f), Texture2D.whiteTexture);
 
         GUI.color = previousColor;
         GUI.Label(portraitRect, enemy.PortraitLabel, portraitStyle);
-        GUI.Label(new Rect(cardRect.x + 8f, cardRect.y + 106f, cardRect.width - 16f, 32f), enemy.Name, enemyNameStyle);
+        GUI.Label(new Rect(cardRect.x + 18f, cardRect.y + 198f, cardRect.width - 36f, 36f), enemy.Name, enemyNameStyle);
+        GUI.Label(new Rect(cardRect.x + 42f, cardRect.y + 244f, cardRect.width - 84f, 52f), enemy.Description, descriptionStyle);
+    }
+
+    private void HandleSwipeInput()
+    {
+        if (Input.touchCount > 0)
+        {
+            var touch = Input.GetTouch(0);
+            if (touch.phase == TouchPhase.Began)
+            {
+                StartSwipe(touch.position);
+            }
+            else if (touch.phase == TouchPhase.Ended || touch.phase == TouchPhase.Canceled)
+            {
+                EndSwipe(touch.position);
+            }
+
+            return;
+        }
+
+        if (Input.GetMouseButtonDown(0))
+        {
+            StartSwipe(Input.mousePosition);
+        }
+        else if (Input.GetMouseButtonUp(0))
+        {
+            EndSwipe(Input.mousePosition);
+        }
+    }
+
+    private void StartSwipe(Vector2 position)
+    {
+        isSwipeTracking = true;
+        swipeStartPosition = position;
+    }
+
+    private void EndSwipe(Vector2 position)
+    {
+        if (!isSwipeTracking)
+        {
+            return;
+        }
+
+        isSwipeTracking = false;
+        var delta = position - swipeStartPosition;
+
+        if (Mathf.Abs(delta.x) < MinSwipeDistance || Mathf.Abs(delta.y) > MaxVerticalSwipeOffset)
+        {
+            return;
+        }
+
+        ChangeEnemy(delta.x < 0f ? 1 : -1);
+    }
+
+    private void ChangeEnemy(int direction)
+    {
+        selectedEnemyIndex = (selectedEnemyIndex + direction + enemies.Length) % enemies.Length;
     }
 
     private void TryStartBattle()
