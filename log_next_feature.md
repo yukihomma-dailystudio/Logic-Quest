@@ -2,6 +2,19 @@
 
 ## 現在の状態
 
+`enemy-select-adjustments` ブランチを `main` から作成した。
+
+次の作業対象は `EnemySelectScene` の見た目と操作感の調整。
+
+確認・調整する内容:
+
+- `Assets/Scripts/EnemySelectSceneController.cs` の現在の UI 構造を確認する
+- 敵カードが画面サイズに対して見やすく並んでいるか確認する
+- 敵の役割や個性が UI 文言から伝わるか確認する
+- `戻る` と `闘技場へ` の導線が分かりやすいか確認する
+- ホーム画面、タイトル画面で整えたファンタジー調 UI から大きく浮かないようにする
+- ゲーム機能やバトルロジックには触らず、敵選択画面の調整に範囲を絞る
+
 `phase4_home_scene_adjustments` は実装分をコミット・push 済み。
 
 - 最新コミット: `787447f Adjust home scene layout`
