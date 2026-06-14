@@ -16,7 +16,7 @@ public sealed class EnemySelectSceneController : MonoBehaviour
         new EnemyOption("現実商人", "需要、手間、継続して使われる理由を測る市場の策士。", "天秤", new Color(0.55f, 0.34f, 0.13f, 1f), "Backgrounds/EnemyFieldRealistMerchant", "Characters/Enemies/RealistMerchant"),
         new EnemyOption("辛口審査官", "使いにくさ、離脱しそうな点、不満の種を指摘する宮廷批評家。", "羽ペン", new Color(0.43f, 0.25f, 0.38f, 1f), "Backgrounds/EnemyFieldHarshReviewer", "Characters/Enemies/HarshReviewer"),
         new EnemyOption("倫理の守護者", "誤解、悪用、安全でない表現を見張る神殿の番人。", "聖印", new Color(0.22f, 0.42f, 0.52f, 1f), "Backgrounds/EnemyFieldEthicsGuardian", "Characters/Enemies/EthicsGuardian"),
-        new EnemyOption("冷徹な投資卿", "成長性、差別化、勝ち筋を問いただす宝物庫の領主。", "王冠", new Color(0.48f, 0.32f, 0.12f, 1f), string.Empty, string.Empty)
+        new EnemyOption("冷徹な投資卿", "成長性、差別化、勝ち筋を問いただす宝物庫の領主。", "王冠", new Color(0.48f, 0.32f, 0.12f, 1f), "Backgrounds/EnemyFieldInvestmentLord", "Characters/Enemies/InvestmentLord")
     };
 
     private int selectedEnemyIndex;
