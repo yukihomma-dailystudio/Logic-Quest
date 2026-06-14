@@ -11,6 +11,8 @@ public sealed class TitleSceneController : MonoBehaviour
 
     private const string CanvasName = "TitleCanvas";
     private const string BackgroundName = "Background";
+    private const string CloudLayerName = "CloudLayer";
+    private const string CloudNamePrefix = "Cloud";
     private const string PanelName = "Panel";
     private const string TitleName = "Title";
     private const string SubtitleName = "Subtitle";
@@ -19,6 +21,11 @@ public sealed class TitleSceneController : MonoBehaviour
     private const string SettingsButtonName = "SettingsButton";
     private const string StartButtonLabelName = "Label";
     private const string MessageName = "Message";
+    private const float ReferenceWidth = 1920f;
+    private const float ReferenceHeight = 1080f;
+    private const int CloudCount = 4;
+
+    private static Sprite cloudSprite;
 
     private bool showMissingSceneMessage;
 
@@ -28,6 +35,7 @@ public sealed class TitleSceneController : MonoBehaviour
     private Button startButton;
     private Button exitButton;
     private Button settingsButton;
+    private RectTransform[] cloudRects;
 
     private void OnEnable()
     {
@@ -47,10 +55,16 @@ public sealed class TitleSceneController : MonoBehaviour
         RefreshUi();
     }
 
+    private void Update()
+    {
+        AnimateClouds();
+    }
+
     private void EnsureUi()
     {
         var canvasTransform = GetOrCreateCanvas();
         CreateOrUpdateBackground(canvasTransform);
+        CreateOrUpdateCloudLayer(canvasTransform);
 
         var panelTransform = GetOrCreateChild(canvasTransform, PanelName);
         var panelRect = GetOrAddComponent<RectTransform>(panelTransform.gameObject);
@@ -221,7 +235,7 @@ public sealed class TitleSceneController : MonoBehaviour
 
         var scaler = GetOrAddComponent<CanvasScaler>(canvasObject);
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(1920f, 1080f);
+        scaler.referenceResolution = new Vector2(ReferenceWidth, ReferenceHeight);
         scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
         scaler.matchWidthOrHeight = 0.5f;
 
@@ -262,6 +276,41 @@ public sealed class TitleSceneController : MonoBehaviour
 
         aspectFitter.enabled = true;
         aspectFitter.aspectRatio = image.sprite.rect.width / image.sprite.rect.height;
+    }
+
+    private void CreateOrUpdateCloudLayer(Transform canvasTransform)
+    {
+        var cloudLayer = GetOrCreateChild(canvasTransform, CloudLayerName);
+        var layerRect = GetOrAddComponent<RectTransform>(cloudLayer.gameObject);
+        layerRect.anchorMin = Vector2.zero;
+        layerRect.anchorMax = Vector2.one;
+        layerRect.offsetMin = Vector2.zero;
+        layerRect.offsetMax = Vector2.zero;
+        layerRect.pivot = new Vector2(0.5f, 0.5f);
+
+        cloudRects = new RectTransform[CloudCount];
+        for (var i = 0; i < CloudCount; i++)
+        {
+            var cloud = GetOrCreateChild(cloudLayer, $"{CloudNamePrefix}{i + 1}");
+            var cloudRect = GetOrAddComponent<RectTransform>(cloud.gameObject);
+            cloudRect.anchorMin = new Vector2(0f, 1f);
+            cloudRect.anchorMax = new Vector2(0f, 1f);
+            cloudRect.pivot = new Vector2(0.5f, 0.5f);
+            cloudRect.sizeDelta = GetCloudSize(i);
+            cloudRect.localScale = Vector3.one;
+
+            var image = GetOrAddComponent<Image>(cloud.gameObject);
+            image.sprite = GetCloudSprite();
+            image.type = Image.Type.Simple;
+            image.preserveAspect = true;
+            image.color = new Color(1f, 1f, 1f, GetCloudAlpha(i));
+            image.raycastTarget = false;
+
+            cloudRects[i] = cloudRect;
+        }
+
+        cloudLayer.SetSiblingIndex(1);
+        AnimateClouds();
     }
 
     private Button CreateButton(
@@ -365,6 +414,128 @@ public sealed class TitleSceneController : MonoBehaviour
         var outline = GetOrAddComponent<Outline>(text.gameObject);
         outline.effectColor = new Color(0.05f, 0.035f, 0.02f, strong ? 0.95f : 0.85f);
         outline.effectDistance = strong ? new Vector2(3f, -3f) : new Vector2(2f, -2f);
+    }
+
+    private void AnimateClouds()
+    {
+        if (cloudRects == null)
+        {
+            return;
+        }
+
+        var time = Application.isPlaying ? Time.time : 0f;
+        for (var i = 0; i < cloudRects.Length; i++)
+        {
+            var cloudRect = cloudRects[i];
+            if (cloudRect == null)
+            {
+                continue;
+            }
+
+            var width = cloudRect.sizeDelta.x;
+            var travelWidth = ReferenceWidth + width + 360f;
+            var x = Mathf.Repeat(GetCloudStartOffset(i) + time * GetCloudSpeed(i), travelWidth) - width - 180f;
+            cloudRect.anchoredPosition = new Vector2(x, -GetCloudTopOffset(i));
+        }
+    }
+
+    private static Vector2 GetCloudSize(int index)
+    {
+        return index switch
+        {
+            0 => new Vector2(360f, 110f),
+            1 => new Vector2(280f, 86f),
+            2 => new Vector2(430f, 128f),
+            _ => new Vector2(320f, 96f),
+        };
+    }
+
+    private static float GetCloudAlpha(int index)
+    {
+        return index switch
+        {
+            0 => 0.18f,
+            1 => 0.14f,
+            2 => 0.11f,
+            _ => 0.16f,
+        };
+    }
+
+    private static float GetCloudSpeed(int index)
+    {
+        return index switch
+        {
+            0 => 7f,
+            1 => 11f,
+            2 => 4.5f,
+            _ => 8.5f,
+        };
+    }
+
+    private static float GetCloudStartOffset(int index)
+    {
+        return index switch
+        {
+            0 => 80f,
+            1 => 520f,
+            2 => 980f,
+            _ => 1420f,
+        };
+    }
+
+    private static float GetCloudTopOffset(int index)
+    {
+        return index switch
+        {
+            0 => 110f,
+            1 => 185f,
+            2 => 72f,
+            _ => 245f,
+        };
+    }
+
+    private static Sprite GetCloudSprite()
+    {
+        if (cloudSprite != null)
+        {
+            return cloudSprite;
+        }
+
+        const int width = 256;
+        const int height = 96;
+        var texture = new Texture2D(width, height, TextureFormat.ARGB32, false)
+        {
+            wrapMode = TextureWrapMode.Clamp,
+            filterMode = FilterMode.Bilinear
+        };
+
+        var pixels = new Color32[width * height];
+        for (var y = 0; y < height; y++)
+        {
+            for (var x = 0; x < width; x++)
+            {
+                var alpha = Mathf.Max(
+                    CloudBlobAlpha(x, y, 58f, 56f, 48f, 26f),
+                    CloudBlobAlpha(x, y, 102f, 44f, 60f, 34f),
+                    CloudBlobAlpha(x, y, 154f, 50f, 64f, 30f),
+                    CloudBlobAlpha(x, y, 202f, 58f, 46f, 22f));
+                pixels[y * width + x] = new Color32(byte.MaxValue, byte.MaxValue, byte.MaxValue, (byte)(alpha * 255f));
+            }
+        }
+
+        texture.SetPixels32(pixels);
+        texture.Apply();
+
+        cloudSprite = Sprite.Create(texture, new Rect(0f, 0f, width, height), new Vector2(0.5f, 0.5f), 100f);
+        return cloudSprite;
+    }
+
+    private static float CloudBlobAlpha(float x, float y, float centerX, float centerY, float radiusX, float radiusY)
+    {
+        var normalizedX = (x - centerX) / radiusX;
+        var normalizedY = (y - centerY) / radiusY;
+        var distance = normalizedX * normalizedX + normalizedY * normalizedY;
+        return Mathf.Clamp01((1f - distance) * 1.4f);
     }
 
     private void HandleExitPressed()
