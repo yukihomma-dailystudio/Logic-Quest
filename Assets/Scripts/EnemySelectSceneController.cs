@@ -7,6 +7,7 @@ public sealed class EnemySelectSceneController : MonoBehaviour
 
     [SerializeField] private string themeInputSceneName = "ThemeInputScene";
     [SerializeField] private string battleSceneName = "BattleScene";
+    [SerializeField] private Texture2D baseBackground;
 
     private readonly EnemyOption[] enemies =
     {
@@ -28,6 +29,7 @@ public sealed class EnemySelectSceneController : MonoBehaviour
 
     private void Start()
     {
+        LoadAssetsIfNeeded();
         var savedEnemy = PlayerPrefs.GetString(LastEnemyKey, enemies[0].Name);
         selectedEnemyIndex = FindEnemyIndex(savedEnemy);
     }
@@ -45,10 +47,28 @@ public sealed class EnemySelectSceneController : MonoBehaviour
 
     private void DrawBackground()
     {
+        if (baseBackground != null)
+        {
+            GUI.DrawTexture(
+                new Rect(0f, 0f, Screen.width, Screen.height),
+                baseBackground,
+                ScaleMode.ScaleAndCrop,
+                false);
+            return;
+        }
+
         var previousColor = GUI.color;
         GUI.color = new Color(0.09f, 0.08f, 0.07f, 1f);
         GUI.DrawTexture(new Rect(0f, 0f, Screen.width, Screen.height), Texture2D.whiteTexture);
         GUI.color = previousColor;
+    }
+
+    private void LoadAssetsIfNeeded()
+    {
+        if (baseBackground == null)
+        {
+            baseBackground = Resources.Load<Texture2D>("Backgrounds/EnemySelectBaseBackground");
+        }
     }
 
     private void DrawEnemyPanel()
