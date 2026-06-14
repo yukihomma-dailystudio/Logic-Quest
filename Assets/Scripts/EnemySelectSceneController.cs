@@ -12,7 +12,7 @@ public sealed class EnemySelectSceneController : MonoBehaviour
     private readonly EnemyOption[] enemies =
     {
         new EnemyOption("見習いスライム", "主張がわかりやすく説明できているかを試す低地の魔物。", "しずく", new Color(0.24f, 0.48f, 0.38f, 1f), "Backgrounds/EnemyFieldBeginnerSlime", "Characters/Enemies/BeginnerSlime"),
-        new EnemyOption("論理の騎士", "理由の弱さ、矛盾、根拠不足を見抜く鎧の決闘者。", "盾", new Color(0.35f, 0.38f, 0.48f, 1f), string.Empty, string.Empty),
+        new EnemyOption("論理の騎士", "理由の弱さ、矛盾、根拠不足を見抜く鎧の決闘者。", "盾", new Color(0.35f, 0.38f, 0.48f, 1f), "Backgrounds/EnemyFieldLogicKnight", "Characters/Enemies/LogicKnight"),
         new EnemyOption("現実商人", "需要、手間、継続して使われる理由を測る市場の策士。", "天秤", new Color(0.55f, 0.34f, 0.13f, 1f), string.Empty, string.Empty),
         new EnemyOption("辛口審査官", "使いにくさ、離脱しそうな点、不満の種を指摘する宮廷批評家。", "羽ペン", new Color(0.43f, 0.25f, 0.38f, 1f), string.Empty, string.Empty),
         new EnemyOption("倫理の守護者", "誤解、悪用、安全でない表現を見張る神殿の番人。", "聖印", new Color(0.22f, 0.42f, 0.52f, 1f), string.Empty, string.Empty),
@@ -249,11 +249,11 @@ public sealed class EnemySelectSceneController : MonoBehaviour
 
     private static Rect GetEnemyPortraitRect()
     {
-        var width = Mathf.Min(300f, Screen.width * 0.26f);
-        var height = Mathf.Min(220f, Screen.height * 0.28f);
+        var width = Mathf.Min(460f, Screen.width * 0.34f);
+        var height = Mathf.Min(430f, Screen.height * 0.42f);
         return new Rect(
             (Screen.width - width) * 0.5f,
-            Screen.height * 0.38f,
+            Screen.height * 0.25f,
             width,
             height);
     }
