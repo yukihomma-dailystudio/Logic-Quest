@@ -4,16 +4,44 @@
 
 `enemy-select-adjustments` ブランチを `main` から作成した。
 
-次の作業対象は `EnemySelectScene` の見た目と操作感の調整。
+`EnemySelectScene` の見えにくい問題の解決を次に行う。
 
-確認・調整する内容:
+現在の実装状況:
 
-- `Assets/Scripts/EnemySelectSceneController.cs` の現在の UI 構造を確認する
-- 敵カードが画面サイズに対して見やすく並んでいるか確認する
-- 敵の役割や個性が UI 文言から伝わるか確認する
-- `戻る` と `闘技場へ` の導線が分かりやすいか確認する
-- ホーム画面、タイトル画面で整えたファンタジー調 UI から大きく浮かないようにする
-- ゲーム機能やバトルロジックには触らず、敵選択画面の調整に範囲を絞る
+- `EnemySelectSceneController.cs` を更新し、敵選択画面を背景つきの敵別表示に調整
+- 敵ごとのフィールド背景を `Assets/Resources/Backgrounds/EnemyField*.png` として追加
+- 敵ごとの立ち絵を `Assets/Resources/Characters/Enemies/*.png` として追加
+- `EnemySelectBaseBackground.png` を追加
+- 左右ボタンとスワイプで敵を切り替える UI を追加
+- 選択中の敵名、説明、枚数表示を表示
+- 最後に選択した敵を `PlayerPrefs` に保存する流れを維持
+
+直近コミット:
+
+- `9df2016 Adjust enemy select swipe UI`
+- `91fbac0 Add enemy select base background`
+- `daaecc4 Add beginner slime enemy select art`
+- `45f59dd Add logic knight enemy select art`
+- `2907316 Add realist merchant enemy select art`
+- `30f9312 Add harsh reviewer enemy select art`
+- `39f01da Add ethics guardian enemy select art`
+- `ac11610 Add investment lord enemy select art`
+
+未確認:
+
+- Unity Editor 上で `EnemySelectScene` の実表示確認
+- 実機でのスワイプ操作確認
+- 各敵背景・立ち絵が画面内に自然に収まるか
+- `相手を選ぶ` から `EnemySelectScene` へ入り、`闘技場へ` で `BattleScene` に進めるか
+
+次に優先して確認・調整する内容:
+
+- `Assets/Scripts/EnemySelectSceneController.cs` の描画順、文字色、背景暗幕、情報プレートを確認する
+- 敵名・説明・現在位置表示が背景や立ち絵に埋もれていないか確認する
+- 左右ボタン、`戻る`、`闘技場へ` が背景上で視認しやすいか確認する
+- 敵立ち絵と文字 UI が重なって読みにくくなっていないか確認する
+- 必要なら半透明パネル、文字の縁取り、暗幕、配置調整で読みやすさを優先する
+- ゲーム機能やバトルロジックには触らず、敵選択画面の視認性改善に範囲を絞る
 
 `phase4_home_scene_adjustments` は実装分をコミット・push 済み。
 
