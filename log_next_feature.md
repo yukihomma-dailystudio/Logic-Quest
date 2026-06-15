@@ -2,92 +2,72 @@
 
 ## 現在の状態
 
-`enemy-select-adjustments` ブランチを `main` から作成した。
+`main` は `origin/main` と同期済み。
 
-`EnemySelectScene` の見えにくい問題の解決を次に行う。
+ブランチ整理済み:
 
-現在の実装状況:
+- ローカルブランチ: `main` のみ
+- リモートブランチ: `origin/main` のみ
 
-- `EnemySelectSceneController.cs` を更新し、敵選択画面を背景つきの敵別表示に調整
-- 敵ごとのフィールド背景を `Assets/Resources/Backgrounds/EnemyField*.png` として追加
-- 敵ごとの立ち絵を `Assets/Resources/Characters/Enemies/*.png` として追加
-- `EnemySelectBaseBackground.png` を追加
-- 左右ボタンとスワイプで敵を切り替える UI を追加
-- 選択中の敵名、説明、枚数表示を表示
-- 最後に選択した敵を `PlayerPrefs` に保存する流れを維持
+`.codex-remote-attachments/` は Codex の添付ファイル用ローカルフォルダとして `.gitignore` に追加済み。
 
-直近コミット:
+敵選択画面の視認性改善は `main` にマージ済み。
 
-- `9df2016 Adjust enemy select swipe UI`
-- `91fbac0 Add enemy select base background`
-- `daaecc4 Add beginner slime enemy select art`
-- `45f59dd Add logic knight enemy select art`
-- `2907316 Add realist merchant enemy select art`
-- `30f9312 Add harsh reviewer enemy select art`
-- `39f01da Add ethics guardian enemy select art`
-- `ac11610 Add investment lord enemy select art`
+主な反映内容:
 
-未確認:
+- 敵ごとのフィールド背景と立ち絵を追加
+- 敵選択画面に透明PNGの額縁フレームを追加
+- 敵背景、敵キャラクター、名前プレートを拡大
+- 左右切り替えボタンと下部操作ボタンを拡大
+- 右下ボタン文言を `この敵に挑戦する` に変更
+- 敵ごとに上がる能力値が異なることを確認
+- 現状のEXP量は全敵共通で `+20` 固定
 
-- Unity Editor 上で `EnemySelectScene` の実表示確認
-- 実機でのスワイプ操作確認
-- 各敵背景・立ち絵が画面内に自然に収まるか
-- `相手を選ぶ` から `EnemySelectScene` へ入り、`闘技場へ` で `BattleScene` に進めるか
+確認済み:
 
-次に優先して確認・調整する内容:
+- `dotnet build thinquest.sln`
+- 警告 0
+- エラー 0
 
-- `Assets/Scripts/EnemySelectSceneController.cs` の描画順、文字色、背景暗幕、情報プレートを確認する
-- 敵名・説明・現在位置表示が背景や立ち絵に埋もれていないか確認する
-- 左右ボタン、`戻る`、`闘技場へ` が背景上で視認しやすいか確認する
-- 敵立ち絵と文字 UI が重なって読みにくくなっていないか確認する
-- 必要なら半透明パネル、文字の縁取り、暗幕、配置調整で読みやすさを優先する
-- ゲーム機能やバトルロジックには触らず、敵選択画面の視認性改善に範囲を絞る
+## 次に行う作業
 
-`phase4_home_scene_adjustments` は実装分をコミット・push 済み。
+`Assets/Scripts/HomeSceneController.cs` が 613 行まで肥大化してきたため、次は別ファイルへ分割するリファクタリングを行う。
 
-- 最新コミット: `787447f Adjust home scene layout`
-- Draft PR: `https://github.com/yukihomma-dailystudio/Logic-Quest/pull/2`
-- 確認済み: `dotnet build thinquest.sln --no-restore`
-- 確認済み: `git diff --check`
+目的:
+
+- `HomeSceneController` の責務を小さくする
+- ホーム画面の見た目や挙動を変えずに、保守しやすい構成にする
+- 今後のホーム画面追加機能を入れやすくする
+
+## リファクタリング方針
+
+まずは挙動を変えない小さな分割を優先する。
+
+候補:
+
+- ホーム画面UI生成ヘルパーを別クラスへ移す
+- ステータス表示まわりを別クラスへ移す
+- クラリス会話・表情切り替えまわりを別クラスへ移す
+- ボタンやテキストなどの共通生成処理を別クラスへ移す
+
+注意点:
+
+- シーン遷移、PlayerPrefs、ユーザーデータ保存の挙動は変えない
+- UI文言は日本語のまま維持する
+- まずは compile-safe な機械的分割を優先する
+- 大きなUI刷新はこの作業では行わない
+- 分割後に `dotnet build thinquest.sln` で確認する
 
 ## 優先して確認すること
 
-1. Unity Editor で `HomeScene` を開き、現在のホーム背景が表示されるか確認する。
+1. `HomeSceneController.cs` のメソッド構成を読み、責務の境界を決める。
+2. 低リスクな static helper から別ファイルへ移す。
+3. `HomeSceneController` に残すべき状態管理とシーン遷移処理を明確にする。
+4. 分割後も `HomeScene` の表示と操作が変わらないことを確認する。
 
-   確認対象:
+## 作業後に確認すること
 
-   - `Assets/Resources/Backgrounds/GuildHallHomeBackground.png`
-   - 上部ステータスフレーム
-   - 下部ナビゲーションフレーム
-   - 右下のクラリス半身絵
-   - 左下 3 ボタンのサイズと位置が背景フレーム内で自然に揃っているか
-
-2. Play Mode でホーム画面の UI 表示を確認する。
-
-   確認対象:
-
-   - 上部ステータス文字がフレーム内に収まるか
-   - `クエスト開始` が押せるか
-   - `本日の討伐依頼` が押せるか
-   - `門へ戻る` が見切れず押せるか
-   - 左下 3 ボタンのクリック領域が小さすぎないか
-   - クラリスの半身絵が右下に自然に収まるか
-   - `ClarisseThinking` / `ClarisseNormal` のランダム表示で背景の四角が出ないか
-
-3. Play Mode で以下の導線を確認する。
-
-   `TitleScene -> HomeScene -> ThemeInputScene -> EnemySelectScene -> BattleScene -> ResultScene`
-
-4. `GameScene` から `BattleScene` へのリネーム後、Unity のシーン参照や Build Settings が壊れていないか確認する。
-
-5. Draft PR #2 の差分を確認し、Unity Editor 上の見た目に問題がなければ ready for review にする。
-
-## 次の実装候補
-
-- Unity Editor 上でホーム画面の上部ステータス、下部ナビ、クラリス半身絵の位置とサイズを必要に応じて微調整する。
-- `本日の討伐依頼` の遷移先や専用機能を実装する。
-- クラリスの表情差分を増やし、状態や日替わりで表示を切り替える。
-- `BattleScene` の文言を、より闘技場や試練らしい表現に寄せる。
-- 結果画面にレベルアップ演出や能力値 EXP の見せ方を追加する。
-- 他シーンにも背景画像を段階的に追加する。
-- バトル評価をもう少し敵ごとに個性が出るようにする。
+- `dotnet build thinquest.sln`
+- `HomeScene` の背景、ステータス、下部ボタン、クラリス表示
+- `TitleScene -> HomeScene -> ThemeInputScene` の導線
+- クラリス入力欄と会話表示
