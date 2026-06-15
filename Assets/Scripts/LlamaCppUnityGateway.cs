@@ -10,6 +10,7 @@ internal sealed class LlamaCppUnityGateway
     private const string LlmTypeName = "LLMUnity.LLM";
     private const string LlmAgentTypeName = "LLMUnity.LLMAgent";
     private const string LlmUnitySetupTypeName = "LLMUnity.LLMUnitySetup";
+    private static bool loggedMissingTypes;
 
     private Component llm;
     private Component llmAgent;
@@ -114,9 +115,22 @@ internal sealed class LlamaCppUnityGateway
 
     private static bool IsLlmUnityAvailable()
     {
-        return FindType(LlmTypeName) != null &&
-            FindType(LlmAgentTypeName) != null &&
-            FindType(LlmUnitySetupTypeName) != null;
+        var llmType = FindType(LlmTypeName);
+        var llmAgentType = FindType(LlmAgentTypeName);
+        var setupType = FindType(LlmUnitySetupTypeName);
+        var available = llmType != null && llmAgentType != null && setupType != null;
+
+        if (!available && !loggedMissingTypes)
+        {
+            loggedMissingTypes = true;
+            Debug.LogWarning(
+                $"LLMUnity runtime types were not found. " +
+                $"{LlmTypeName}: {llmType != null}, " +
+                $"{LlmAgentTypeName}: {llmAgentType != null}, " +
+                $"{LlmUnitySetupTypeName}: {setupType != null}");
+        }
+
+        return available;
     }
 
     private static IEnumerator WaitForLlmUnitySetup()
