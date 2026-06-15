@@ -217,6 +217,27 @@ public sealed class EnemySelectSceneController : MonoBehaviour
             normal = { textColor = new Color(0.95f, 0.84f, 0.58f) }
         };
 
+        var arrowButtonStyle = new GUIStyle(GUI.skin.button)
+        {
+            alignment = TextAnchor.MiddleCenter,
+            fontSize = 34,
+            fontStyle = FontStyle.Bold,
+            normal = { textColor = new Color(1f, 0.92f, 0.68f) },
+            hover = { textColor = Color.white },
+            active = { textColor = Color.white }
+        };
+
+        var actionButtonStyle = new GUIStyle(GUI.skin.button)
+        {
+            alignment = TextAnchor.MiddleCenter,
+            fontSize = 22,
+            fontStyle = FontStyle.Bold,
+            wordWrap = true,
+            normal = { textColor = new Color(1f, 0.92f, 0.68f) },
+            hover = { textColor = Color.white },
+            active = { textColor = Color.white }
+        };
+
         GUI.Label(new Rect(0f, 26f, Screen.width, 42f), "挑戦者を選ぶ", titleStyle);
         GUI.Label(
             new Rect(Screen.width * 0.2f, 74f, Screen.width * 0.6f, 42f),
@@ -238,27 +259,40 @@ public sealed class EnemySelectSceneController : MonoBehaviour
             "左右スワイプで相手を切り替え",
             hintStyle);
 
-        if (GUI.Button(new Rect(Screen.width * 0.08f, Screen.height * 0.46f, 72f, 54f), "←"))
+        var arrowWidth = Mathf.Clamp(Screen.width * 0.075f, 88f, 116f);
+        var arrowHeight = Mathf.Clamp(Screen.height * 0.095f, 72f, 96f);
+        var arrowY = Screen.height * 0.44f;
+        if (DrawProminentButton(
+                new Rect(Screen.width * 0.065f, arrowY, arrowWidth, arrowHeight),
+                "←",
+                arrowButtonStyle))
         {
             ChangeEnemy(-1);
         }
 
-        if (GUI.Button(new Rect(Screen.width * 0.92f - 72f, Screen.height * 0.46f, 72f, 54f), "→"))
+        if (DrawProminentButton(
+                new Rect(Screen.width * 0.935f - arrowWidth, arrowY, arrowWidth, arrowHeight),
+                "→",
+                arrowButtonStyle))
         {
             ChangeEnemy(1);
         }
 
         var bottomMargin = Mathf.Max(24f, Screen.height * 0.04f);
-        var buttonWidth = Mathf.Min(220f, Screen.width * 0.24f);
-        var buttonHeight = 48f;
-        if (GUI.Button(new Rect(28f, Screen.height - bottomMargin - buttonHeight, buttonWidth, buttonHeight), "ギルドに戻る"))
+        var buttonWidth = Mathf.Clamp(Screen.width * 0.25f, 220f, 320f);
+        var buttonHeight = Mathf.Clamp(Screen.height * 0.082f, 64f, 82f);
+        if (DrawProminentButton(
+                new Rect(28f, Screen.height - bottomMargin - buttonHeight, buttonWidth, buttonHeight),
+                "ギルドに戻る",
+                actionButtonStyle))
         {
             SceneManager.LoadScene(homeSceneName);
         }
 
-        if (GUI.Button(
+        if (DrawProminentButton(
                 new Rect(Screen.width - 28f - buttonWidth, Screen.height - bottomMargin - buttonHeight, buttonWidth, buttonHeight),
-                "敵と戦う"))
+                "敵と戦う",
+                actionButtonStyle))
         {
             TryStartBattle();
         }
@@ -270,6 +304,27 @@ public sealed class EnemySelectSceneController : MonoBehaviour
                 "BattleScene がまだ登録されていません。戦闘ボタンは自動でつながります。",
                 messageStyle);
         }
+    }
+
+    private static bool DrawProminentButton(Rect rect, string text, GUIStyle style)
+    {
+        var previousColor = GUI.color;
+        var previousBackgroundColor = GUI.backgroundColor;
+
+        GUI.color = new Color(0f, 0f, 0f, 0.48f);
+        GUI.DrawTexture(new Rect(rect.x + 5f, rect.y + 6f, rect.width, rect.height), Texture2D.whiteTexture);
+        GUI.color = new Color(0.82f, 0.61f, 0.28f, 0.95f);
+        GUI.DrawTexture(new Rect(rect.x - 3f, rect.y - 3f, rect.width + 6f, rect.height + 6f), Texture2D.whiteTexture);
+        GUI.color = new Color(0.16f, 0.09f, 0.04f, 0.98f);
+        GUI.DrawTexture(new Rect(rect.x + 2f, rect.y + 2f, rect.width - 4f, rect.height - 4f), Texture2D.whiteTexture);
+
+        GUI.color = Color.white;
+        GUI.backgroundColor = new Color(0.52f, 0.31f, 0.12f, 1f);
+        var clicked = GUI.Button(rect, text, style);
+
+        GUI.backgroundColor = previousBackgroundColor;
+        GUI.color = previousColor;
+        return clicked;
     }
 
     private static Rect GetEnemyPortraitRect()
