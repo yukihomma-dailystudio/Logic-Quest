@@ -7,7 +7,8 @@ using UnityEngine.UI;
 public sealed class TitleSceneController : MonoBehaviour
 {
     [SerializeField] private string nextSceneName = "HomeScene";
-    [SerializeField] private string backgroundResourcePath = "Backgrounds/GuildEntranceBackground";
+    [SerializeField] private string backgroundResourcePath = "Backgrounds/GuildEntranceForeground";
+    [SerializeField] private string fallbackBackgroundResourcePath = "Backgrounds/GuildEntranceBackground";
     [SerializeField] private string skyLoopResourcePath = "Backgrounds/GuildEntranceSkyLoop";
 
     private const string CanvasName = "TitleCanvas";
@@ -259,6 +260,10 @@ public sealed class TitleSceneController : MonoBehaviour
         var image = GetOrAddComponent<Image>(background.gameObject);
         image.color = Color.white;
         image.sprite = Resources.Load<Sprite>(backgroundResourcePath);
+        if (image.sprite == null)
+        {
+            image.sprite = Resources.Load<Sprite>(fallbackBackgroundResourcePath);
+        }
         image.type = Image.Type.Simple;
         image.preserveAspect = false;
         image.raycastTarget = false;
