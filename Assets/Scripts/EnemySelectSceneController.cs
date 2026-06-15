@@ -291,7 +291,7 @@ public sealed class EnemySelectSceneController : MonoBehaviour
 
         if (DrawProminentButton(
                 new Rect(Screen.width - 28f - buttonWidth, Screen.height - bottomMargin - buttonHeight, buttonWidth, buttonHeight),
-                "敵と戦う",
+                "この敵に挑戦する",
                 actionButtonStyle))
         {
             TryStartBattle();
