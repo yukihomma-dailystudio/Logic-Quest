@@ -8,6 +8,7 @@ public sealed class EnemySelectSceneController : MonoBehaviour
     [SerializeField] private string homeSceneName = "HomeScene";
     [SerializeField] private string battleSceneName = "BattleScene";
     [SerializeField] private Texture2D baseBackground;
+    [SerializeField] private Texture2D fieldFrame;
 
     private readonly EnemyOption[] enemies =
     {
@@ -75,6 +76,11 @@ public sealed class EnemySelectSceneController : MonoBehaviour
             baseBackground = Resources.Load<Texture2D>("Backgrounds/EnemySelectBaseBackground");
         }
 
+        if (fieldFrame == null)
+        {
+            fieldFrame = Resources.Load<Texture2D>("Backgrounds/EnemyFieldFrame");
+        }
+
         LoadSelectedEnemyAssets();
     }
 
@@ -91,14 +97,33 @@ public sealed class EnemySelectSceneController : MonoBehaviour
         GUI.DrawTexture(fieldRect, selectedFieldBackground, ScaleMode.ScaleAndCrop, false);
         GUI.color = new Color(0f, 0f, 0f, 0.22f);
         GUI.DrawTexture(fieldRect, Texture2D.whiteTexture);
+        DrawFieldFrame(fieldRect);
         GUI.color = previousColor;
+    }
+
+    private void DrawFieldFrame(Rect fieldRect)
+    {
+        if (fieldFrame == null)
+        {
+            return;
+        }
+
+        var horizontalPadding = fieldRect.width * 96f / 1856f;
+        var verticalPadding = fieldRect.height * 54f / 1044f;
+        var frameRect = new Rect(
+            fieldRect.x - horizontalPadding,
+            fieldRect.y - verticalPadding,
+            fieldRect.width + horizontalPadding * 2f,
+            fieldRect.height + verticalPadding * 2f);
+
+        GUI.DrawTexture(frameRect, fieldFrame, ScaleMode.StretchToFill, true);
     }
 
     private Rect GetFieldBackgroundRect()
     {
-        var width = Mathf.Min(Screen.width * 0.82f, 1320f);
+        var width = Mathf.Min(Screen.width * 0.88f, 1440f);
         var height = width * 9f / 16f;
-        var maxHeight = Screen.height * 0.74f;
+        var maxHeight = Screen.height * 0.78f;
         if (height > maxHeight)
         {
             height = maxHeight;
@@ -107,7 +132,7 @@ public sealed class EnemySelectSceneController : MonoBehaviour
 
         return new Rect(
             (Screen.width - width) * 0.5f,
-            Mathf.Max(24f, Screen.height * 0.12f),
+            Mathf.Max(24f, Screen.height * 0.105f),
             width,
             height);
     }
@@ -152,7 +177,7 @@ public sealed class EnemySelectSceneController : MonoBehaviour
         var enemyNameStyle = new GUIStyle(GUI.skin.label)
         {
             alignment = TextAnchor.MiddleCenter,
-            fontSize = 26,
+            fontSize = 30,
             fontStyle = FontStyle.Bold,
             wordWrap = true,
             normal = { textColor = new Color(0.95f, 0.84f, 0.58f) }
@@ -170,7 +195,7 @@ public sealed class EnemySelectSceneController : MonoBehaviour
         var descriptionStyle = new GUIStyle(GUI.skin.label)
         {
             alignment = TextAnchor.MiddleCenter,
-            fontSize = 17,
+            fontSize = 19,
             fontStyle = FontStyle.Bold,
             wordWrap = true,
             normal = { textColor = new Color(0.96f, 0.9f, 0.76f) }
@@ -249,11 +274,11 @@ public sealed class EnemySelectSceneController : MonoBehaviour
 
     private static Rect GetEnemyPortraitRect()
     {
-        var width = Mathf.Min(460f, Screen.width * 0.34f);
-        var height = Mathf.Min(430f, Screen.height * 0.42f);
+        var width = Mathf.Min(540f, Screen.width * 0.42f);
+        var height = Mathf.Min(520f, Screen.height * 0.52f);
         return new Rect(
             (Screen.width - width) * 0.5f,
-            Screen.height * 0.25f,
+            Screen.height * 0.205f,
             width,
             height);
     }
@@ -296,10 +321,10 @@ public sealed class EnemySelectSceneController : MonoBehaviour
         GUIStyle descriptionStyle)
     {
         var plateRect = new Rect(
-            portraitRect.x - 80f,
-            portraitRect.y + portraitRect.height + 18f,
-            portraitRect.width + 160f,
-            96f);
+            portraitRect.x - 120f,
+            portraitRect.y + portraitRect.height + 10f,
+            portraitRect.width + 240f,
+            112f);
 
         var previousColor = GUI.color;
         GUI.color = new Color(0.14f, 0.08f, 0.04f, 0.78f);
@@ -309,8 +334,8 @@ public sealed class EnemySelectSceneController : MonoBehaviour
         GUI.DrawTexture(new Rect(plateRect.x, plateRect.yMax - 4f, plateRect.width, 4f), Texture2D.whiteTexture);
         GUI.color = previousColor;
 
-        GUI.Label(new Rect(plateRect.x + 18f, plateRect.y + 8f, plateRect.width - 36f, 34f), enemy.Name, enemyNameStyle);
-        GUI.Label(new Rect(plateRect.x + 28f, plateRect.y + 44f, plateRect.width - 56f, 42f), enemy.Description, descriptionStyle);
+        GUI.Label(new Rect(plateRect.x + 18f, plateRect.y + 10f, plateRect.width - 36f, 38f), enemy.Name, enemyNameStyle);
+        GUI.Label(new Rect(plateRect.x + 30f, plateRect.y + 54f, plateRect.width - 60f, 48f), enemy.Description, descriptionStyle);
     }
 
     private void HandleSwipeInput()
