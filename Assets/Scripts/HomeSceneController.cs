@@ -32,6 +32,7 @@ public sealed class HomeSceneController : MonoBehaviour
 
     private bool showMissingThemeInputSceneMessage;
     private UserProfile profile;
+    private readonly ClarisseLlmService clarisseLlmService = new ClarisseLlmService();
     private RawImage backgroundImage;
     private RawImage characterImage;
     private Text statusHeaderText;
@@ -44,6 +45,7 @@ public sealed class HomeSceneController : MonoBehaviour
     private Button backButton;
     private Button characterButton;
     private Button clarisseSendButton;
+    private bool isClarisseGenerating;
 
     private void Start()
     {
@@ -109,8 +111,8 @@ public sealed class HomeSceneController : MonoBehaviour
         characterImage.raycastTarget = true;
         characterButton = HomeUiFactory.GetOrAddComponent<Button>(characterImage.gameObject);
         characterButton.targetGraphic = characterImage;
-        characterButton.onClick.RemoveListener(ShowRandomClarisseLine);
-        characterButton.onClick.AddListener(ShowRandomClarisseLine);
+        characterButton.onClick.RemoveListener(GenerateClarisseTapLine);
+        characterButton.onClick.AddListener(GenerateClarisseTapLine);
         characterImage.transform.SetAsLastSibling();
         clarisseTalkRoot.SetAsLastSibling();
     }
@@ -225,7 +227,7 @@ public sealed class HomeSceneController : MonoBehaviour
             "ClarisseInput",
             new Rect(0f, 0.68f, 0.70f, 0.22f),
             "クラリスに話しかける");
-        clarisseInputField.characterLimit = ClarisseDialogue.InputCharacterLimit;
+        clarisseInputField.characterLimit = ClarisseLlmSettings.InputCharacterLimit;
 
         clarisseSendButton = HomeUiFactory.CreateTransparentButton(
             talkRoot,
@@ -311,14 +313,19 @@ public sealed class HomeSceneController : MonoBehaviour
         SceneManager.LoadScene(titleSceneName);
     }
 
-    private void ShowRandomClarisseLine()
+    private void GenerateClarisseTapLine()
     {
-        SetClarisseLine(ClarisseDialogue.ChooseTapLine());
+        if (isClarisseGenerating)
+        {
+            return;
+        }
+
+        StartCoroutine(GenerateClarisseLine(clarisseLlmService.GenerateTapLine));
     }
 
     private void SubmitClarisseInput()
     {
-        if (clarisseInputField == null)
+        if (clarisseInputField == null || isClarisseGenerating)
         {
             return;
         }
@@ -329,8 +336,22 @@ public sealed class HomeSceneController : MonoBehaviour
             return;
         }
 
-        SetClarisseLine(ClarisseDialogue.CreateReply(input));
         clarisseInputField.text = string.Empty;
+        StartCoroutine(GenerateClarisseLine(onComplete => clarisseLlmService.GenerateReply(input, onComplete)));
+    }
+
+    private System.Collections.IEnumerator GenerateClarisseLine(System.Func<System.Action<string>, System.Collections.IEnumerator> generate)
+    {
+        isClarisseGenerating = true;
+        SetUiLocked(true);
+        SetClarisseLine(ClarisseLlmSettings.ThinkingMessage);
+
+        string generatedLine = null;
+        yield return generate(line => generatedLine = line);
+
+        SetClarisseLine(string.IsNullOrEmpty(generatedLine) ? ClarisseLlmSettings.GenerationFailedMessage : generatedLine);
+        SetUiLocked(false);
+        isClarisseGenerating = false;
     }
 
     private void SetClarisseLine(string line)
@@ -355,6 +376,41 @@ public sealed class HomeSceneController : MonoBehaviour
         if (characterImage != null)
         {
             characterImage.texture = clarisseCharacter;
+        }
+    }
+
+    private void SetUiLocked(bool locked)
+    {
+        var interactable = !locked;
+
+        if (startButton != null)
+        {
+            startButton.interactable = interactable;
+        }
+
+        if (dailyHuntButton != null)
+        {
+            dailyHuntButton.interactable = interactable;
+        }
+
+        if (backButton != null)
+        {
+            backButton.interactable = interactable;
+        }
+
+        if (characterButton != null)
+        {
+            characterButton.interactable = interactable;
+        }
+
+        if (clarisseSendButton != null)
+        {
+            clarisseSendButton.interactable = interactable;
+        }
+
+        if (clarisseInputField != null)
+        {
+            clarisseInputField.interactable = interactable;
         }
     }
 }
