@@ -29,6 +29,8 @@ public sealed class EnemySelectSceneController : MonoBehaviour
 
     private const float MinSwipeDistance = 64f;
     private const float MaxVerticalSwipeOffset = 96f;
+    private const float NamePlateGap = 10f;
+    private const float ContentGap = 10f;
 
     private void Start()
     {
@@ -174,10 +176,20 @@ public sealed class EnemySelectSceneController : MonoBehaviour
             normal = { textColor = new Color(1f, 0.7f, 0.56f) }
         };
 
+        var namePlateHeight = GetNamePlateHeight();
+        var bottomMargin = Mathf.Clamp(Screen.height * 0.04f, 16f, 36f);
+        var buttonWidth = Mathf.Clamp(Screen.width * 0.25f, 180f, 320f);
+        var buttonHeight = Mathf.Clamp(Screen.height * 0.075f, 54f, 82f);
+        var bottomButtonY = Screen.height - bottomMargin - buttonHeight;
+        var hintRect = new Rect(Screen.width * 0.30f, bottomButtonY - 32f, Screen.width * 0.40f, 24f);
+        var counterRect = new Rect(Screen.width * 0.44f, hintRect.y - 26f, Screen.width * 0.12f, 22f);
+        var messageRect = new Rect(Screen.width * 0.20f, counterRect.y - 28f, Screen.width * 0.60f, 24f);
+        var portraitBottomLimit = (showMissingBattleSceneMessage ? messageRect.y : counterRect.y) - ContentGap;
+
         var enemyNameStyle = new GUIStyle(GUI.skin.label)
         {
             alignment = TextAnchor.MiddleCenter,
-            fontSize = 30,
+            fontSize = Mathf.RoundToInt(Mathf.Clamp(namePlateHeight * 0.27f, 20f, 30f)),
             fontStyle = FontStyle.Bold,
             wordWrap = true,
             normal = { textColor = new Color(0.95f, 0.84f, 0.58f) }
@@ -195,7 +207,7 @@ public sealed class EnemySelectSceneController : MonoBehaviour
         var descriptionStyle = new GUIStyle(GUI.skin.label)
         {
             alignment = TextAnchor.MiddleCenter,
-            fontSize = 19,
+            fontSize = Mathf.RoundToInt(Mathf.Clamp(namePlateHeight * 0.17f, 14f, 19f)),
             fontStyle = FontStyle.Bold,
             wordWrap = true,
             normal = { textColor = new Color(0.96f, 0.9f, 0.76f) }
@@ -245,23 +257,17 @@ public sealed class EnemySelectSceneController : MonoBehaviour
             bodyStyle);
 
         var selectedEnemy = enemies[selectedEnemyIndex];
-        var portraitRect = GetEnemyPortraitRect();
+        var portraitRect = GetEnemyPortraitRect(portraitBottomLimit, namePlateHeight);
+        var namePlateRect = GetNamePlateRect(portraitRect, namePlateHeight);
         DrawEnemyPortrait(portraitRect, selectedEnemy, selectedEnemyPortrait, portraitStyle);
-        DrawNamePlate(portraitRect, selectedEnemy, enemyNameStyle, descriptionStyle);
+        DrawNamePlate(namePlateRect, selectedEnemy, enemyNameStyle, descriptionStyle);
 
-        GUI.Label(
-            new Rect(Screen.width * 0.44f, Screen.height * 0.78f, Screen.width * 0.12f, 24f),
-            $"{selectedEnemyIndex + 1} / {enemies.Length}",
-            counterStyle);
-
-        GUI.Label(
-            new Rect(Screen.width * 0.30f, Screen.height * 0.815f, Screen.width * 0.40f, 28f),
-            "左右スワイプで相手を切り替え",
-            hintStyle);
+        GUI.Label(counterRect, $"{selectedEnemyIndex + 1} / {enemies.Length}", counterStyle);
+        GUI.Label(hintRect, "左右スワイプで相手を切り替え", hintStyle);
 
         var arrowWidth = Mathf.Clamp(Screen.width * 0.075f, 88f, 116f);
         var arrowHeight = Mathf.Clamp(Screen.height * 0.095f, 72f, 96f);
-        var arrowY = Screen.height * 0.44f;
+        var arrowY = portraitRect.center.y - arrowHeight * 0.5f;
         if (DrawProminentButton(
                 new Rect(Screen.width * 0.065f, arrowY, arrowWidth, arrowHeight),
                 "←",
@@ -278,11 +284,8 @@ public sealed class EnemySelectSceneController : MonoBehaviour
             ChangeEnemy(1);
         }
 
-        var bottomMargin = Mathf.Max(24f, Screen.height * 0.04f);
-        var buttonWidth = Mathf.Clamp(Screen.width * 0.25f, 220f, 320f);
-        var buttonHeight = Mathf.Clamp(Screen.height * 0.082f, 64f, 82f);
         if (DrawProminentButton(
-                new Rect(28f, Screen.height - bottomMargin - buttonHeight, buttonWidth, buttonHeight),
+                new Rect(28f, bottomButtonY, buttonWidth, buttonHeight),
                 "ギルドに戻る",
                 actionButtonStyle))
         {
@@ -290,7 +293,7 @@ public sealed class EnemySelectSceneController : MonoBehaviour
         }
 
         if (DrawProminentButton(
-                new Rect(Screen.width - 28f - buttonWidth, Screen.height - bottomMargin - buttonHeight, buttonWidth, buttonHeight),
+                new Rect(Screen.width - 28f - buttonWidth, bottomButtonY, buttonWidth, buttonHeight),
                 "この敵に挑戦する",
                 actionButtonStyle))
         {
@@ -300,7 +303,7 @@ public sealed class EnemySelectSceneController : MonoBehaviour
         if (showMissingBattleSceneMessage)
         {
             GUI.Label(
-                new Rect(Screen.width * 0.20f, Screen.height - bottomMargin - buttonHeight - 34f, Screen.width * 0.60f, 24f),
+                messageRect,
                 "BattleScene がまだ登録されていません。戦闘ボタンは自動でつながります。",
                 messageStyle);
         }
@@ -327,13 +330,30 @@ public sealed class EnemySelectSceneController : MonoBehaviour
         return clicked;
     }
 
-    private static Rect GetEnemyPortraitRect()
+    private static float GetNamePlateHeight()
+    {
+        return Mathf.Clamp(Screen.height * 0.145f, 84f, 112f);
+    }
+
+    private static Rect GetEnemyPortraitRect(float bottomLimit, float namePlateHeight)
     {
         var width = Mathf.Min(540f, Screen.width * 0.42f);
-        var height = Mathf.Min(520f, Screen.height * 0.52f);
+        var top = Mathf.Clamp(Screen.height * 0.18f, 96f, 160f);
+        var availableHeight = bottomLimit - top - NamePlateGap - namePlateHeight;
+        if (availableHeight < 140f)
+        {
+            top = Mathf.Max(72f, bottomLimit - NamePlateGap - namePlateHeight - 140f);
+            availableHeight = bottomLimit - top - NamePlateGap - namePlateHeight;
+        }
+
+        var height = Mathf.Clamp(
+            Mathf.Min(520f, Screen.height * 0.48f, availableHeight),
+            120f,
+            520f);
+
         return new Rect(
             (Screen.width - width) * 0.5f,
-            Screen.height * 0.205f,
+            top,
             width,
             height);
     }
@@ -369,18 +389,22 @@ public sealed class EnemySelectSceneController : MonoBehaviour
         GUI.Label(portraitRect, enemy.PortraitLabel, portraitStyle);
     }
 
+    private static Rect GetNamePlateRect(Rect portraitRect, float namePlateHeight)
+    {
+        var width = Mathf.Min(Screen.width - 40f, portraitRect.width + 240f);
+        return new Rect(
+            (Screen.width - width) * 0.5f,
+            portraitRect.y + portraitRect.height + NamePlateGap,
+            width,
+            namePlateHeight);
+    }
+
     private static void DrawNamePlate(
-        Rect portraitRect,
+        Rect plateRect,
         EnemyOption enemy,
         GUIStyle enemyNameStyle,
         GUIStyle descriptionStyle)
     {
-        var plateRect = new Rect(
-            portraitRect.x - 120f,
-            portraitRect.y + portraitRect.height + 10f,
-            portraitRect.width + 240f,
-            112f);
-
         var previousColor = GUI.color;
         GUI.color = new Color(0.14f, 0.08f, 0.04f, 0.78f);
         GUI.DrawTexture(plateRect, Texture2D.whiteTexture);
@@ -389,8 +413,8 @@ public sealed class EnemySelectSceneController : MonoBehaviour
         GUI.DrawTexture(new Rect(plateRect.x, plateRect.yMax - 4f, plateRect.width, 4f), Texture2D.whiteTexture);
         GUI.color = previousColor;
 
-        GUI.Label(new Rect(plateRect.x + 18f, plateRect.y + 10f, plateRect.width - 36f, 38f), enemy.Name, enemyNameStyle);
-        GUI.Label(new Rect(plateRect.x + 30f, plateRect.y + 54f, plateRect.width - 60f, 48f), enemy.Description, descriptionStyle);
+        GUI.Label(new Rect(plateRect.x + 18f, plateRect.y + 8f, plateRect.width - 36f, plateRect.height * 0.34f), enemy.Name, enemyNameStyle);
+        GUI.Label(new Rect(plateRect.x + 30f, plateRect.y + plateRect.height * 0.48f, plateRect.width - 60f, plateRect.height * 0.43f), enemy.Description, descriptionStyle);
     }
 
     private void HandleSwipeInput()
