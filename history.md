@@ -250,3 +250,57 @@ EXP まわりの現状も確認した。
 次の作業方針:
 
 `Assets/Scripts/HomeSceneController.cs` が 613 行まで肥大化しているため、次は責務ごとに別ファイルへ分割するリファクタリングを行う。
+
+## 2026-06-15 HomeScene リファクタリングと敵選択レイアウト調整
+
+`codex-continue-work` ブランチで、ホーム画面の責務分割と敵選択画面の可変サイズ対応を進めた。
+
+push 済みコミット:
+
+- `e2d8f81 Refactor home scene controller`
+- `aa9f58a Stabilize enemy select layout`
+- `b6a2403 Document push confirmation rule`
+
+主な変更:
+
+- `Assets/Scripts/HomeSceneController.cs` から UI 生成ヘルパーを分離
+- `Assets/Scripts/HomeUiFactory.cs` を追加
+- `Assets/Scripts/ClarisseDialogue.cs` を追加
+- クラリスの台詞、返答分類、表情画像ロードを `ClarisseDialogue` に集約
+- `HomeSceneController.cs` は 360 行程度まで縮小
+- 敵選択画面で、下部ボタンの位置を先に確定し、その上にヒント、カウンター、名前プレート、立ち絵を収めるよう調整
+- 画面高さが小さい場合でも、敵選択画面の立ち絵、名前プレート、下部ボタンが重なりにくいようにした
+- `AGENT.md` に、ユーザーの明示依頼なしに GitHub へ push しないルールを追記
+
+確認済み:
+
+- `dotnet build thinquest.sln --no-restore`
+- `git diff --check`
+
+未コミットの追加変更:
+
+- `Assets/Scripts/EnemySelectSceneController.cs` で、敵選択画面の上部説明文と下部ヒントを読みやすくする調整を追加
+- 上部説明文と下部ヒントを拡大、太字化
+- 薄い黒帯を追加して背景に埋もれにくくした
+- この変更はまだコミットも push もしていない
+
+## 次の作業方針: ResultScene 強化
+
+次は `Assets/Scripts/ResultSceneController.cs` を中心に、リザルトシーンを強化する。
+
+現在のリザルトシーンは IMGUI ベースの簡素な表示で、バトル後の達成感や獲得 EXP の見せ方がまだ弱い。
+
+優先方針:
+
+- `試練の戦果` 画面としての見た目を強める
+- 獲得 EXP と伸びた能力値を分かりやすく見せる
+- 挑戦した巻物、対峙した相手、あなたの返答、試練の講評を読みやすく整理する
+- 冒険者記録を結果画面内で確認しやすくする
+- `ギルドへ戻る` と `次の巻物` の導線を分かりやすくする
+
+注意点:
+
+- PlayerPrefs のキーや保存済み結果データの読み込み挙動は維持する
+- オンライン AI や評価ロジックの大型追加はまだ行わない
+- まずは見た目、読みやすさ、画面サイズ変更への耐性を優先する
+- 作業後は `dotnet build thinquest.sln --no-restore` と `git diff --check` を確認する

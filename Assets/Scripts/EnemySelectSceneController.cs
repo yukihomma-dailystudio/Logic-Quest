@@ -163,7 +163,8 @@ public sealed class EnemySelectSceneController : MonoBehaviour
         var bodyStyle = new GUIStyle(GUI.skin.label)
         {
             alignment = TextAnchor.MiddleCenter,
-            fontSize = 15,
+            fontSize = Mathf.RoundToInt(Mathf.Clamp(Screen.height * 0.024f, 16f, 22f)),
+            fontStyle = FontStyle.Bold,
             wordWrap = true,
             normal = { textColor = new Color(0.92f, 0.84f, 0.68f) }
         };
@@ -181,9 +182,9 @@ public sealed class EnemySelectSceneController : MonoBehaviour
         var buttonWidth = Mathf.Clamp(Screen.width * 0.25f, 180f, 320f);
         var buttonHeight = Mathf.Clamp(Screen.height * 0.075f, 54f, 82f);
         var bottomButtonY = Screen.height - bottomMargin - buttonHeight;
-        var hintRect = new Rect(Screen.width * 0.30f, bottomButtonY - 32f, Screen.width * 0.40f, 24f);
-        var counterRect = new Rect(Screen.width * 0.44f, hintRect.y - 26f, Screen.width * 0.12f, 22f);
-        var messageRect = new Rect(Screen.width * 0.20f, counterRect.y - 28f, Screen.width * 0.60f, 24f);
+        var hintRect = new Rect(Screen.width * 0.24f, bottomButtonY - 44f, Screen.width * 0.52f, 34f);
+        var counterRect = new Rect(Screen.width * 0.43f, hintRect.y - 32f, Screen.width * 0.14f, 26f);
+        var messageRect = new Rect(Screen.width * 0.20f, counterRect.y - 32f, Screen.width * 0.60f, 26f);
         var portraitBottomLimit = (showMissingBattleSceneMessage ? messageRect.y : counterRect.y) - ContentGap;
 
         var enemyNameStyle = new GUIStyle(GUI.skin.label)
@@ -216,15 +217,16 @@ public sealed class EnemySelectSceneController : MonoBehaviour
         var hintStyle = new GUIStyle(GUI.skin.label)
         {
             alignment = TextAnchor.MiddleCenter,
-            fontSize = 13,
+            fontSize = Mathf.RoundToInt(Mathf.Clamp(Screen.height * 0.023f, 16f, 20f)),
+            fontStyle = FontStyle.Bold,
             wordWrap = true,
-            normal = { textColor = new Color(0.88f, 0.78f, 0.62f) }
+            normal = { textColor = new Color(0.96f, 0.88f, 0.68f) }
         };
 
         var counterStyle = new GUIStyle(GUI.skin.label)
         {
             alignment = TextAnchor.MiddleCenter,
-            fontSize = 15,
+            fontSize = Mathf.RoundToInt(Mathf.Clamp(Screen.height * 0.023f, 16f, 20f)),
             fontStyle = FontStyle.Bold,
             normal = { textColor = new Color(0.95f, 0.84f, 0.58f) }
         };
@@ -251,10 +253,8 @@ public sealed class EnemySelectSceneController : MonoBehaviour
         };
 
         GUI.Label(new Rect(0f, 26f, Screen.width, 42f), "挑戦者を選ぶ", titleStyle);
-        GUI.Label(
-            new Rect(Screen.width * 0.2f, 74f, Screen.width * 0.6f, 42f),
-            "左右にスワイプして、闘技場であなたの巻物を試す相手を選びましょう。",
-            bodyStyle);
+        var topHintRect = new Rect(Screen.width * 0.16f, 68f, Screen.width * 0.68f, 40f);
+        DrawReadableLabel(topHintRect, "左右にスワイプして、闘技場であなたの巻物を試す相手を選びましょう。", bodyStyle);
 
         var selectedEnemy = enemies[selectedEnemyIndex];
         var portraitRect = GetEnemyPortraitRect(portraitBottomLimit, namePlateHeight);
@@ -263,7 +263,7 @@ public sealed class EnemySelectSceneController : MonoBehaviour
         DrawNamePlate(namePlateRect, selectedEnemy, enemyNameStyle, descriptionStyle);
 
         GUI.Label(counterRect, $"{selectedEnemyIndex + 1} / {enemies.Length}", counterStyle);
-        GUI.Label(hintRect, "左右スワイプで相手を切り替え", hintStyle);
+        DrawReadableLabel(hintRect, "左右スワイプで相手を切り替え", hintStyle);
 
         var arrowWidth = Mathf.Clamp(Screen.width * 0.075f, 88f, 116f);
         var arrowHeight = Mathf.Clamp(Screen.height * 0.095f, 72f, 96f);
@@ -328,6 +328,15 @@ public sealed class EnemySelectSceneController : MonoBehaviour
         GUI.backgroundColor = previousBackgroundColor;
         GUI.color = previousColor;
         return clicked;
+    }
+
+    private static void DrawReadableLabel(Rect rect, string text, GUIStyle style)
+    {
+        var previousColor = GUI.color;
+        GUI.color = new Color(0f, 0f, 0f, 0.42f);
+        GUI.DrawTexture(new Rect(rect.x - 14f, rect.y - 4f, rect.width + 28f, rect.height + 8f), Texture2D.whiteTexture);
+        GUI.color = previousColor;
+        GUI.Label(rect, text, style);
     }
 
     private static float GetNamePlateHeight()
