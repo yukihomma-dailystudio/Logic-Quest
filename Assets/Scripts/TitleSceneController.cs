@@ -8,11 +8,13 @@ public sealed class TitleSceneController : MonoBehaviour
 {
     [SerializeField] private string nextSceneName = "HomeScene";
     [SerializeField] private string backgroundResourcePath = "Backgrounds/GuildEntranceBackground";
+    [SerializeField] private string skyLoopResourcePath = "Backgrounds/GuildEntranceSkyLoop";
 
     private const string CanvasName = "TitleCanvas";
     private const string BackgroundName = "Background";
-    private const string CloudLayerName = "CloudLayer";
-    private const string CloudNamePrefix = "Cloud";
+    private const string LegacyCloudLayerName = "CloudLayer";
+    private const string SkyLoopLayerName = "SkyLoopLayer";
+    private const string SkyTileNamePrefix = "SkyTile";
     private const string PanelName = "Panel";
     private const string TitleName = "Title";
     private const string SubtitleName = "Subtitle";
@@ -23,9 +25,8 @@ public sealed class TitleSceneController : MonoBehaviour
     private const string MessageName = "Message";
     private const float ReferenceWidth = 1920f;
     private const float ReferenceHeight = 1080f;
-    private const int CloudCount = 4;
-
-    private static Sprite cloudSprite;
+    private const int SkyTileCount = 2;
+    private const float SkyLoopSpeed = 12f;
 
     private bool showMissingSceneMessage;
 
@@ -35,7 +36,7 @@ public sealed class TitleSceneController : MonoBehaviour
     private Button startButton;
     private Button exitButton;
     private Button settingsButton;
-    private RectTransform[] cloudRects;
+    private RectTransform[] skyTileRects;
 
     private void OnEnable()
     {
@@ -57,16 +58,18 @@ public sealed class TitleSceneController : MonoBehaviour
 
     private void Update()
     {
-        AnimateClouds();
+        AnimateSkyLoop();
     }
 
     private void EnsureUi()
     {
         var canvasTransform = GetOrCreateCanvas();
+        DisableLegacyCloudLayer(canvasTransform);
+        CreateOrUpdateSkyLoopLayer(canvasTransform);
         CreateOrUpdateBackground(canvasTransform);
-        CreateOrUpdateCloudLayer(canvasTransform);
 
         var panelTransform = GetOrCreateChild(canvasTransform, PanelName);
+        panelTransform.SetAsLastSibling();
         var panelRect = GetOrAddComponent<RectTransform>(panelTransform.gameObject);
         panelRect.anchorMin = Vector2.zero;
         panelRect.anchorMax = Vector2.one;
@@ -276,41 +279,48 @@ public sealed class TitleSceneController : MonoBehaviour
 
         aspectFitter.enabled = true;
         aspectFitter.aspectRatio = image.sprite.rect.width / image.sprite.rect.height;
+        background.SetSiblingIndex(1);
     }
 
-    private void CreateOrUpdateCloudLayer(Transform canvasTransform)
+    private void CreateOrUpdateSkyLoopLayer(Transform canvasTransform)
     {
-        var cloudLayer = GetOrCreateChild(canvasTransform, CloudLayerName);
-        var layerRect = GetOrAddComponent<RectTransform>(cloudLayer.gameObject);
+        var skyLayer = GetOrCreateChild(canvasTransform, SkyLoopLayerName);
+        skyLayer.gameObject.SetActive(true);
+
+        var layerRect = GetOrAddComponent<RectTransform>(skyLayer.gameObject);
         layerRect.anchorMin = Vector2.zero;
         layerRect.anchorMax = Vector2.one;
         layerRect.offsetMin = Vector2.zero;
         layerRect.offsetMax = Vector2.zero;
         layerRect.pivot = new Vector2(0.5f, 0.5f);
 
-        cloudRects = new RectTransform[CloudCount];
-        for (var i = 0; i < CloudCount; i++)
+        var skySprite = Resources.Load<Sprite>(skyLoopResourcePath);
+        skyTileRects = new RectTransform[SkyTileCount];
+        for (var i = 0; i < SkyTileCount; i++)
         {
-            var cloud = GetOrCreateChild(cloudLayer, $"{CloudNamePrefix}{i + 1}");
-            var cloudRect = GetOrAddComponent<RectTransform>(cloud.gameObject);
-            cloudRect.anchorMin = new Vector2(0f, 1f);
-            cloudRect.anchorMax = new Vector2(0f, 1f);
-            cloudRect.pivot = new Vector2(0.5f, 0.5f);
-            cloudRect.sizeDelta = GetCloudSize(i);
-            cloudRect.localScale = Vector3.one;
+            var skyTile = GetOrCreateChild(skyLayer, $"{SkyTileNamePrefix}{i + 1}");
+            skyTile.gameObject.SetActive(true);
 
-            var image = GetOrAddComponent<Image>(cloud.gameObject);
-            image.sprite = GetCloudSprite();
+            var tileRect = GetOrAddComponent<RectTransform>(skyTile.gameObject);
+            tileRect.anchorMin = new Vector2(0f, 0.5f);
+            tileRect.anchorMax = new Vector2(0f, 0.5f);
+            tileRect.pivot = new Vector2(0.5f, 0.5f);
+            tileRect.sizeDelta = new Vector2(ReferenceWidth + 8f, ReferenceHeight);
+            tileRect.localScale = Vector3.one;
+
+            var image = GetOrAddComponent<Image>(skyTile.gameObject);
+            image.sprite = skySprite;
             image.type = Image.Type.Simple;
-            image.preserveAspect = true;
-            image.color = new Color(1f, 1f, 1f, GetCloudAlpha(i));
+            image.preserveAspect = false;
+            image.color = skySprite == null ? new Color(0.36f, 0.66f, 0.94f, 1f) : Color.white;
             image.raycastTarget = false;
 
-            cloudRects[i] = cloudRect;
+            skyTileRects[i] = tileRect;
         }
 
-        cloudLayer.SetSiblingIndex(1);
-        AnimateClouds();
+        HideUnusedSkyChildren(skyLayer);
+        skyLayer.SetSiblingIndex(0);
+        AnimateSkyLoop();
     }
 
     private Button CreateButton(
@@ -416,126 +426,47 @@ public sealed class TitleSceneController : MonoBehaviour
         outline.effectDistance = strong ? new Vector2(3f, -3f) : new Vector2(2f, -2f);
     }
 
-    private void AnimateClouds()
+    private void AnimateSkyLoop()
     {
-        if (cloudRects == null)
+        if (skyTileRects == null)
         {
             return;
         }
 
         var time = Application.isPlaying ? Time.time : 0f;
-        for (var i = 0; i < cloudRects.Length; i++)
+        var offset = Mathf.Repeat(time * SkyLoopSpeed, ReferenceWidth);
+        for (var i = 0; i < skyTileRects.Length; i++)
         {
-            var cloudRect = cloudRects[i];
-            if (cloudRect == null)
+            var tileRect = skyTileRects[i];
+            if (tileRect == null)
             {
                 continue;
             }
 
-            var width = cloudRect.sizeDelta.x;
-            var travelWidth = ReferenceWidth + width + 360f;
-            var x = Mathf.Repeat(GetCloudStartOffset(i) + time * GetCloudSpeed(i), travelWidth) - width - 180f;
-            cloudRect.anchoredPosition = new Vector2(x, -GetCloudTopOffset(i));
+            var x = -offset + i * ReferenceWidth + ReferenceWidth * 0.5f;
+            tileRect.anchoredPosition = new Vector2(x, 0f);
         }
     }
 
-    private static Vector2 GetCloudSize(int index)
+    private static void DisableLegacyCloudLayer(Transform canvasTransform)
     {
-        return index switch
+        var legacyLayer = canvasTransform.Find(LegacyCloudLayerName);
+        if (legacyLayer != null)
         {
-            0 => new Vector2(360f, 110f),
-            1 => new Vector2(280f, 86f),
-            2 => new Vector2(430f, 128f),
-            _ => new Vector2(320f, 96f),
-        };
-    }
-
-    private static float GetCloudAlpha(int index)
-    {
-        return index switch
-        {
-            0 => 0.18f,
-            1 => 0.14f,
-            2 => 0.11f,
-            _ => 0.16f,
-        };
-    }
-
-    private static float GetCloudSpeed(int index)
-    {
-        return index switch
-        {
-            0 => 7f,
-            1 => 11f,
-            2 => 4.5f,
-            _ => 8.5f,
-        };
-    }
-
-    private static float GetCloudStartOffset(int index)
-    {
-        return index switch
-        {
-            0 => 80f,
-            1 => 520f,
-            2 => 980f,
-            _ => 1420f,
-        };
-    }
-
-    private static float GetCloudTopOffset(int index)
-    {
-        return index switch
-        {
-            0 => 110f,
-            1 => 185f,
-            2 => 72f,
-            _ => 245f,
-        };
-    }
-
-    private static Sprite GetCloudSprite()
-    {
-        if (cloudSprite != null)
-        {
-            return cloudSprite;
+            legacyLayer.gameObject.SetActive(false);
         }
+    }
 
-        const int width = 256;
-        const int height = 96;
-        var texture = new Texture2D(width, height, TextureFormat.ARGB32, false)
+    private static void HideUnusedSkyChildren(Transform skyLayer)
+    {
+        for (var i = 0; i < skyLayer.childCount; i++)
         {
-            wrapMode = TextureWrapMode.Clamp,
-            filterMode = FilterMode.Bilinear
-        };
-
-        var pixels = new Color32[width * height];
-        for (var y = 0; y < height; y++)
-        {
-            for (var x = 0; x < width; x++)
+            var child = skyLayer.GetChild(i);
+            if (!child.name.StartsWith(SkyTileNamePrefix))
             {
-                var alpha = Mathf.Max(
-                    CloudBlobAlpha(x, y, 58f, 56f, 48f, 26f),
-                    CloudBlobAlpha(x, y, 102f, 44f, 60f, 34f),
-                    CloudBlobAlpha(x, y, 154f, 50f, 64f, 30f),
-                    CloudBlobAlpha(x, y, 202f, 58f, 46f, 22f));
-                pixels[y * width + x] = new Color32(byte.MaxValue, byte.MaxValue, byte.MaxValue, (byte)(alpha * 255f));
+                child.gameObject.SetActive(false);
             }
         }
-
-        texture.SetPixels32(pixels);
-        texture.Apply();
-
-        cloudSprite = Sprite.Create(texture, new Rect(0f, 0f, width, height), new Vector2(0.5f, 0.5f), 100f);
-        return cloudSprite;
-    }
-
-    private static float CloudBlobAlpha(float x, float y, float centerX, float centerY, float radiusX, float radiusY)
-    {
-        var normalizedX = (x - centerX) / radiusX;
-        var normalizedY = (y - centerY) / radiusY;
-        var distance = normalizedX * normalizedX + normalizedY * normalizedY;
-        return Mathf.Clamp01((1f - distance) * 1.4f);
     }
 
     private void HandleExitPressed()
