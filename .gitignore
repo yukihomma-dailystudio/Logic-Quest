@@ -467,6 +467,15 @@ crashlytics-build.properties
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
 
+# Local LLM assets and generated native runtime
+*.gguf
+*.gguf.meta
+/[Aa]ssets/[Ss]treamingAssets/[Ll]lama[Ll]ib-*/
+/[Aa]ssets/[Ss]treamingAssets/[Ll]lama[Ll]ib-*.meta
+!/[Aa]ssets/[Ss]treamingAssets/[Mm]odels/
+!/[Aa]ssets/[Ss]treamingAssets/[Mm]odels/README.txt
+!/[Aa]ssets/[Ss]treamingAssets/[Mm]odels/README.txt.meta
+
 # End of https://www.toptal.com/developers/gitignore/api/csharp,unity
 
 # Codex local attachments
