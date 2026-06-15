@@ -8,6 +8,7 @@ internal static class ClarisseLlmSettings
     public const string ModelsDirectoryName = "Models";
     public const int InputCharacterLimit = 50;
     public const int OutputCharacterLimit = 80;
+    public const int ConversationHistoryTurnLimit = 4;
     public const int MaxGeneratedTokens = 48;
     public const float Temperature = 0.7f;
     public const int ContextSize = 1024;
@@ -17,6 +18,19 @@ internal static class ClarisseLlmSettings
     public const string LlamaCppUnityDisabledMessage = "ローカルLLM機能がまだ有効化されていません。";
     public const string GenerationFailedMessage = "うまく考えをまとめられませんでした。もう一度お試しください。";
     public const string BusyMessage = "クラリスはまだ考え中です。";
+    private const string BasePrompt =
+        "あなたは思考トレーニングRPG ThinQuest のギルド受付、クラリスです。" +
+        "クラリスは丁寧で少しお嬢様口調ですが、話しすぎません。" +
+        "ユーザーに答えを与えるのではなく、考えを一歩だけ前に進める短い問いを返します。" +
+        "返答は日本語で80文字以内。" +
+        "「ですわ」「ですの」は自然な時だけ使い、毎回使いすぎないでください。" +
+        "「」はつけない、。はつけない" +
+        "返答は、共感ひとこと + 小さな問い、または小さな次の一歩にしてください。";
+    private const string ConversationPrompt =
+        "直近の会話履歴がある場合は文脈として使います。" +
+        "ただし最新のユーザー入力への返答を最優先にし、前の話を無視した別話題にしないでください。" +
+        "最新のユーザー入力が質問なら、まずその質問に直接返してください。" +
+        "代名詞や「それ」「さっき」などは会話履歴から補ってください。";
 
     public static readonly string[] NgWords =
     {
@@ -31,20 +45,18 @@ internal static class ClarisseLlmSettings
         "暴力"
     };
 
-    public static string BuildTapPrompt()
+    public static string BuildTapPrompt(string conversationContext)
     {
         return
-            "あなたは思考トレーニングRPG ThinQuest の案内役クラリスです。\n" +
-            "ユーザーに答えを与えず、今日の考える練習をやさしく促してください。\n" +
-            "日本語で一言だけ、80文字以内で返してください。";
+            BasePrompt + "\n" +
+            ConversationPrompt + "\n" +
+            FormatConversationContext(conversationContext) +
+            "最新の状況: ユーザーがクラリスに話しかけようとしています。";
     }
 
     public static string GetSystemPrompt()
     {
-        return
-            "あなたは思考トレーニングRPG ThinQuest の案内役クラリスです。\n" +
-            "答えを代わりに作らず、ユーザーが自分で考えるための短い一言だけを返します。\n" +
-            "日本語で、やさしく上品に、80文字以内で返してください。";
+        return BasePrompt;
     }
 
     public static string GetMissingModelMessage()
@@ -52,13 +64,13 @@ internal static class ClarisseLlmSettings
         return $"モデルファイルが見つかりません。StreamingAssets/Models/{ModelFileName} を配置してください。";
     }
 
-    public static string BuildReplyPrompt(string userInput)
+    public static string BuildReplyPrompt(string userInput, string conversationContext)
     {
         return
-            "あなたは思考トレーニングRPG ThinQuest の案内役クラリスです。\n" +
-            "ユーザーに答えを与えすぎず、考えを少し整えるための短い返答をしてください。\n" +
-            "日本語で80文字以内。質問か軽い励ましを一つだけ。\n" +
-            $"ユーザーの一言: {userInput}";
+            BasePrompt + "\n" +
+            ConversationPrompt + "\n" +
+            FormatConversationContext(conversationContext) +
+            $"最新のユーザー入力: {userInput}";
     }
 
     public static string GetStreamingAssetsModelPath()
@@ -100,5 +112,15 @@ internal static class ClarisseLlmSettings
     {
         var path = Path.Combine(Application.streamingAssetsPath, directoryName, fileName);
         return path.Replace('\\', '/');
+    }
+
+    private static string FormatConversationContext(string conversationContext)
+    {
+        if (string.IsNullOrEmpty(conversationContext))
+        {
+            return "会話履歴: なし\n";
+        }
+
+        return $"会話履歴:\n{conversationContext}\n";
     }
 }
