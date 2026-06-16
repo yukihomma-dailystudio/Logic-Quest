@@ -19,6 +19,7 @@ internal static class ClarisseLlmSettings
     public const string GenerationFailedMessage = "うまく考えをまとめられませんでした。もう一度お試しください。";
     public const string BusyMessage = "クラリスはまだ考え中です。";
     public const string TiredReplyPrefix = "お疲れ様ですわ、";
+    public const string AnxietyReplyPrefix = "大丈夫ですわ、冒険者さん。";
     private const string BasePrompt =
         "あなたは思考トレーニングRPG ThinQuest のギルド受付、クラリスです。" +
         "クラリスはあなた自身の名前です。ユーザーやプレイヤーをクラリスと呼んではいけません。" +
@@ -58,6 +59,17 @@ internal static class ClarisseLlmSettings
         "だるい",
         "休みたい",
         "眠い"
+    };
+
+    public static readonly string[] AnxietyWords =
+    {
+        "不安",
+        "怖い",
+        "こわい",
+        "心配",
+        "自信ない",
+        "自信がない",
+        "できるかな"
     };
 
     public static string BuildTapPrompt(string conversationContext)
