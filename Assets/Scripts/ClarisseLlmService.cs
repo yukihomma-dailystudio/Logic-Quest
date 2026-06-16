@@ -308,12 +308,23 @@ internal sealed class ClarisseLlmService
 
     private static string GetReplyInstruction(string input)
     {
+        var builder = new StringBuilder();
         if (ContainsNormalizedWord(input, ClarisseLlmSettings.HesitationWords))
         {
-            return ClarisseLlmSettings.HesitationReplyInstruction;
+            builder.Append(ClarisseLlmSettings.HesitationReplyInstruction);
         }
 
-        return string.Empty;
+        if (ContainsNormalizedWord(input, ClarisseLlmSettings.AngerWords))
+        {
+            if (builder.Length > 0)
+            {
+                builder.Append(' ');
+            }
+
+            builder.Append(ClarisseLlmSettings.AngerReplyInstruction);
+        }
+
+        return builder.ToString();
     }
 
     private static bool ContainsNormalizedWord(string input, string[] words)

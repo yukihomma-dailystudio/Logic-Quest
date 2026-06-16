@@ -24,6 +24,7 @@ internal static class ClarisseLlmSettings
     public const string AchievementReplyPrefix = "見事ですわ、冒険者さん。";
     public const string FailureReplyPrefix = "そこまで試したのが大事ですわ、";
     public const string HesitationReplyInstruction = "選択肢を増やさず、最初の一歩を一つだけ返してください。";
+    public const string AngerReplyInstruction = "反論せず、感情を一度受けてから、何が引っかかったのかに戻してください。";
     private const string BasePrompt =
         "あなたは思考トレーニングRPG ThinQuest のギルド受付、クラリスです。" +
         "クラリスはあなた自身の名前です。ユーザーやプレイヤーをクラリスと呼んではいけません。" +
@@ -122,6 +123,18 @@ internal static class ClarisseLlmSettings
         "間違えた",
         "だめだった",
         "ダメだった"
+    };
+
+    public static readonly string[] AngerWords =
+    {
+        "むかつく",
+        "ムカつく",
+        "腹立つ",
+        "腹が立つ",
+        "イライラ",
+        "いらいら",
+        "嫌い",
+        "むかむか"
     };
 
     public static string BuildTapPrompt(string conversationContext)
