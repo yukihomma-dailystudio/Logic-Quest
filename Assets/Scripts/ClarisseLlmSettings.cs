@@ -20,6 +20,7 @@ internal static class ClarisseLlmSettings
     public const string BusyMessage = "クラリスはまだ考え中です。";
     public const string TiredReplyPrefix = "お疲れ様ですわ、";
     public const string AnxietyReplyPrefix = "大丈夫ですわ、冒険者さん。";
+    public const string HesitationReplyInstruction = "選択肢を増やさず、最初の一歩を一つだけ返してください。";
     private const string BasePrompt =
         "あなたは思考トレーニングRPG ThinQuest のギルド受付、クラリスです。" +
         "クラリスはあなた自身の名前です。ユーザーやプレイヤーをクラリスと呼んではいけません。" +
@@ -72,6 +73,18 @@ internal static class ClarisseLlmSettings
         "できるかな"
     };
 
+    public static readonly string[] HesitationWords =
+    {
+        "迷う",
+        "迷って",
+        "決められない",
+        "決まらない",
+        "わからない",
+        "分からない",
+        "悩む",
+        "悩んで"
+    };
+
     public static string BuildTapPrompt(string conversationContext)
     {
         return
@@ -91,12 +104,13 @@ internal static class ClarisseLlmSettings
         return $"モデルファイルが見つかりません。StreamingAssets/Models/{ModelFileName} を配置してください。";
     }
 
-    public static string BuildReplyPrompt(string userInput, string conversationContext)
+    public static string BuildReplyPrompt(string userInput, string conversationContext, string replyInstruction)
     {
         return
             BasePrompt + "\n" +
             ConversationPrompt + "\n" +
             FormatConversationContext(conversationContext) +
+            FormatReplyInstruction(replyInstruction) +
             $"最新のユーザー入力: {userInput}";
     }
 
@@ -149,5 +163,15 @@ internal static class ClarisseLlmSettings
         }
 
         return $"会話履歴:\n{conversationContext}\n";
+    }
+
+    private static string FormatReplyInstruction(string replyInstruction)
+    {
+        if (string.IsNullOrEmpty(replyInstruction))
+        {
+            return string.Empty;
+        }
+
+        return $"今回の追加方針: {replyInstruction}\n";
     }
 }

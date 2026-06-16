@@ -27,9 +27,10 @@ internal sealed class ClarisseLlmService
         }
 
         var replyPrefix = GetReplyPrefix(trimmedInput);
+        var replyInstruction = GetReplyInstruction(trimmedInput);
 
         yield return Generate(
-            ClarisseLlmSettings.BuildReplyPrompt(trimmedInput, BuildConversationContext()),
+            ClarisseLlmSettings.BuildReplyPrompt(trimmedInput, BuildConversationContext(), replyInstruction),
             trimmedInput,
             replyPrefix,
             onComplete);
@@ -288,6 +289,16 @@ internal sealed class ClarisseLlmService
         }
 
         return prefixedReply.Substring(0, ClarisseLlmSettings.OutputCharacterLimit);
+    }
+
+    private static string GetReplyInstruction(string input)
+    {
+        if (ContainsNormalizedWord(input, ClarisseLlmSettings.HesitationWords))
+        {
+            return ClarisseLlmSettings.HesitationReplyInstruction;
+        }
+
+        return string.Empty;
     }
 
     private static bool ContainsNormalizedWord(string input, string[] words)
