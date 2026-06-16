@@ -14,7 +14,7 @@ internal sealed class ClarisseLlmService
 
     public IEnumerator GenerateTapLine(Action<string> onComplete)
     {
-        yield return Generate(ClarisseLlmSettings.BuildTapPrompt(BuildConversationContext()), null, onComplete);
+        yield return Generate(ClarisseLlmSettings.BuildTapPrompt(BuildConversationContext()), null, string.Empty, onComplete);
     }
 
     public IEnumerator GenerateReply(string input, Action<string> onComplete)
@@ -26,13 +26,16 @@ internal sealed class ClarisseLlmService
             yield break;
         }
 
+        var replyPrefix = GetReplyPrefix(trimmedInput);
+
         yield return Generate(
             ClarisseLlmSettings.BuildReplyPrompt(trimmedInput, BuildConversationContext()),
             trimmedInput,
+            replyPrefix,
             onComplete);
     }
 
-    private IEnumerator Generate(string prompt, string userInput, Action<string> onComplete)
+    private IEnumerator Generate(string prompt, string userInput, string replyPrefix, Action<string> onComplete)
     {
         if (isGenerating)
         {
@@ -73,7 +76,7 @@ internal sealed class ClarisseLlmService
             yield break;
         }
 
-        var response = result.Success ? CleanOutput(result.Text) : result.Text;
+        var response = result.Success ? ApplyReplyPrefix(CleanOutput(result.Text), replyPrefix) : result.Text;
         if (result.Success)
         {
             AddConversationTurn(userInput, response);
@@ -253,11 +256,42 @@ internal sealed class ClarisseLlmService
 
     private static bool ContainsNgWord(string input)
     {
-        var normalizedInput = ClarisseLlmSettings.NormalizeForNgCheck(input);
-        foreach (var ngWord in ClarisseLlmSettings.NgWords)
+        return ContainsNormalizedWord(input, ClarisseLlmSettings.NgWords);
+    }
+
+    private static string GetReplyPrefix(string input)
+    {
+        if (ContainsNormalizedWord(input, ClarisseLlmSettings.TiredWords))
         {
-            var normalizedNgWord = ClarisseLlmSettings.NormalizeForNgCheck(ngWord);
-            if (!string.IsNullOrEmpty(normalizedNgWord) && normalizedInput.Contains(normalizedNgWord))
+            return ClarisseLlmSettings.TiredReplyPrefix;
+        }
+
+        return string.Empty;
+    }
+
+    private static string ApplyReplyPrefix(string reply, string prefix)
+    {
+        if (string.IsNullOrEmpty(prefix) || string.IsNullOrEmpty(reply) || reply.StartsWith(prefix, StringComparison.Ordinal))
+        {
+            return reply;
+        }
+
+        var prefixedReply = prefix + reply;
+        if (prefixedReply.Length <= ClarisseLlmSettings.OutputCharacterLimit)
+        {
+            return prefixedReply;
+        }
+
+        return prefixedReply.Substring(0, ClarisseLlmSettings.OutputCharacterLimit);
+    }
+
+    private static bool ContainsNormalizedWord(string input, string[] words)
+    {
+        var normalizedInput = ClarisseLlmSettings.NormalizeForNgCheck(input);
+        foreach (var word in words)
+        {
+            var normalizedWord = ClarisseLlmSettings.NormalizeForNgCheck(word);
+            if (!string.IsNullOrEmpty(normalizedWord) && normalizedInput.Contains(normalizedWord))
             {
                 return true;
             }

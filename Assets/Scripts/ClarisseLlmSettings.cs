@@ -18,6 +18,7 @@ internal static class ClarisseLlmSettings
     public const string LlamaCppUnityDisabledMessage = "ローカルLLM機能がまだ有効化されていません。";
     public const string GenerationFailedMessage = "うまく考えをまとめられませんでした。もう一度お試しください。";
     public const string BusyMessage = "クラリスはまだ考え中です。";
+    public const string TiredReplyPrefix = "お疲れ様ですわ、";
     private const string BasePrompt =
         "あなたは思考トレーニングRPG ThinQuest のギルド受付、クラリスです。" +
         "クラリスはあなた自身の名前です。ユーザーやプレイヤーをクラリスと呼んではいけません。" +
@@ -45,6 +46,18 @@ internal static class ClarisseLlmSettings
         "エロ",
         "セックス",
         "暴力"
+    };
+
+    public static readonly string[] TiredWords =
+    {
+        "疲れた",
+        "つかれた",
+        "疲れ",
+        "しんどい",
+        "しんど",
+        "だるい",
+        "休みたい",
+        "眠い"
     };
 
     public static string BuildTapPrompt(string conversationContext)
