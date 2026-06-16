@@ -111,6 +111,7 @@ public sealed class HomeSceneController : MonoBehaviour
         characterImage.raycastTarget = true;
         characterButton = HomeUiFactory.GetOrAddComponent<Button>(characterImage.gameObject);
         characterButton.targetGraphic = characterImage;
+        ConfigureCharacterButtonColors(characterButton);
         characterButton.onClick.RemoveListener(GenerateClarisseTapLine);
         characterButton.onClick.AddListener(GenerateClarisseTapLine);
         characterImage.transform.SetAsLastSibling();
@@ -377,6 +378,17 @@ public sealed class HomeSceneController : MonoBehaviour
         {
             characterImage.texture = clarisseCharacter;
         }
+    }
+
+    private static void ConfigureCharacterButtonColors(Button button)
+    {
+        var colors = button.colors;
+        colors.normalColor = Color.white;
+        colors.highlightedColor = Color.white;
+        colors.pressedColor = Color.white;
+        colors.selectedColor = Color.white;
+        colors.disabledColor = Color.white;
+        button.colors = colors;
     }
 
     private void SetUiLocked(bool locked)
