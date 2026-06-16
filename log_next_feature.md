@@ -2,12 +2,20 @@
 
 ## 現在の状態
 
-作業ブランチは `codex-local-llm-clarisse`。
+作業ブランチは `main`。
 
-ローカルと `origin/codex-local-llm-clarisse` は一致しており、作業ツリーは clean。
+ログ追記前のローカルと `origin/main` は一致しており、クラリスLLM対応は `main` に反映済み。
+
+現在はこのログ更新と `AGENT.md` の運用ルール追記が未コミット。
+
+最新コミット:
+
+- `52cbf2fb Update local Clarisse LLM integration`
 
 直近で push 済みの主なコミット:
 
+- `52cbf2fb Update local Clarisse LLM integration`
+- `a3f885d6 Enhance result scene presentation`
 - `ad60df8d Add Clarisse dialogue smoke test tooling`
 - `d0598614 Add anger guidance for Clarisse`
 - `f32fc136 Add failure reply prefix for Clarisse`
@@ -28,6 +36,7 @@ HomeScene のクラリス会話は `ClarisseLlmService` 経由でローカルLLM
 
 - クラリスをタップした時、入力送信時にローカルLLM生成を試す
 - 生成中は `考え中...` を表示し、入力欄や送信ボタンをロックする
+- `考え中...` 表示中もクラリス画像が半透明にならないよう、画像ボタンの disabledColor を白固定している
 - 入力は 50 文字、出力は 80 文字に制限
 - NGワード検出時は `・・・` を返す
 - 直近4ターンの会話履歴をプロンプトに含める
@@ -80,6 +89,13 @@ HomeScene のクラリス会話は `ClarisseLlmService` 経由でローカルLLM
 
 - Unity Editor で同じプロジェクトを開いたままだと batchmode が起動できない
 - 実行時だけ `Assets/Scripts/ClarisseDialogueCliSmokeTest.generated.cs` を生成し、終了後に削除する
+
+## 作業運用メモ
+
+`AGENT.md` に次の運用ルールを追記済み。
+
+- ファイルを書き換える前に、変更予定箇所の差分案をユーザーへ提示する
+- 進め方は、ユーザーが OK したらこちらで書き換える、またはユーザー自身が差分案をもとに書き換える、の二択にする
 
 ## 次に行う作業
 

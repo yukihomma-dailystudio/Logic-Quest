@@ -424,3 +424,32 @@ push 済みコミット:
 
 - ResultScene の実機表示で結果部分が小さくなる問題を調査する
 - `Assets/Scripts/ResultSceneController.cs` のレイアウト、文字サイズ、スケール計算、safe area 対応を確認する
+
+## 2026-06-17 main 反映と作業運用ルール追記
+
+作業開始時点のブランチは `main`。
+
+ログ追記前は `origin/main` と一致しており、最新コミットは次の状態。
+
+- `52cbf2fb Update local Clarisse LLM integration`
+
+ここまでのクラリスLLM関連作業は `main` に反映済み。
+
+主な反映内容:
+
+- HomeScene のクラリス会話をローカルLLM生成に接続
+- LLMUnity の `LLM` / `LLMAgent` を利用するためのランタイム生成処理を追加
+- `Assets/link.xml` と `Assets/Scripts/LlamaCppUnityPreserve.cs` で IL2CPP ストリッピング対策を追加
+- 直近4ターンの会話履歴をプロンプトに含め、最新入力や質問への直接返答を優先するよう調整
+- クラリス画像ボタンの無効時カラーを白固定し、`考え中...` 表示中も半透明にならないよう修正
+- `tools/run_clarisse_dialogue_smoke.ps1` によるクラリス会話のスモーク確認手段を追加
+- タイトル画面の背景レイヤー試作素材と処理を整理
+
+確認済み:
+
+- `dotnet build thinquest.sln --no-restore`
+
+運用ルールの追記:
+
+- `AGENT.md` に、ファイル変更前は変更予定箇所の差分案を提示することを追記
+- 進め方は、ユーザーが OK したらこちらで書き換える、またはユーザー自身が差分案をもとに書き換える、の二択とする
