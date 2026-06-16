@@ -385,3 +385,42 @@ ResultScene の主な変更:
 - `ProjectSettings/ProjectSettings.asset` で `AndroidTargetArchitectures` が `3` から `2` に変わっている
 - この変更が意図したものか確認が必要
 - クラリスLLM対応とタイトル雲背景試作が同じ未コミット状態に混ざっているため、次回はブランチまたはコミットを分けた方がよい
+
+## 2026-06-16 クラリスLLM整理と特殊ワード対応
+
+`codex-local-llm-clarisse` ブランチでクラリスLLM対応を整理し、`origin/codex-local-llm-clarisse` へ push 済み。
+
+push 済みコミット:
+
+- `cabbad2c Update local Clarisse LLM integration`
+- `8689034a Improve Clarisse role context`
+- `a3cc3aa6 Add tired reply prefix for Clarisse`
+- `3327da0e Fix Clarisse player address`
+- `979684e4 Add anxiety reply prefix for Clarisse`
+- `aeed8248 Add hesitation guidance for Clarisse`
+- `3e0c514e Add low motivation reply prefix for Clarisse`
+- `5864912f Add achievement reply prefix for Clarisse`
+- `f32fc136 Add failure reply prefix for Clarisse`
+- `d0598614 Add anger guidance for Clarisse`
+- `ad60df8d Add Clarisse dialogue smoke test tooling`
+
+主な内容:
+
+- HomeScene のクラリス会話を `ClarisseLlmService` 経由のローカルLLM生成に整理
+- LLMUnity の `LLM` / `LLMAgent` を利用して GGUF モデルを呼び出す準備を追加
+- 直近4ターンの会話履歴をプロンプトに含め、最新入力を優先するよう調整
+- ユーザーへの呼びかけを `冒険者さん` に固定
+- 疲労、不安、やる気低下、達成、失敗の各系統は LLM生成後に接頭句を付ける
+- 迷い、怒りの各系統は LLM への追加方針としてプロンプトに渡す
+- CLIからクラリス会話の固定入力を流して返答ログを見る `tools/run_clarisse_dialogue_smoke.ps1` を追加
+- クラリス画像ボタンのホバー/押下/無効時カラーを白固定し、タップ可能化による見た目変化を抑制
+
+確認済み:
+
+- `dotnet build thinquest.sln --no-restore`
+- PowerShell スモークテストスクリプトの構文チェック
+
+次の作業:
+
+- ResultScene の実機表示で結果部分が小さくなる問題を調査する
+- `Assets/Scripts/ResultSceneController.cs` のレイアウト、文字サイズ、スケール計算、safe area 対応を確認する

@@ -4,112 +4,106 @@
 
 作業ブランチは `codex-local-llm-clarisse`。
 
-`main` / `origin/main` は以下のコミットが先端。
+ローカルと `origin/codex-local-llm-clarisse` は一致しており、作業ツリーは clean。
 
-- `edef476 Improve enemy select hints and update logs`
+直近で push 済みの主なコミット:
 
-別ブランチ `result-scene-enhancement` は push 済み。
+- `ad60df8d Add Clarisse dialogue smoke test tooling`
+- `d0598614 Add anger guidance for Clarisse`
+- `f32fc136 Add failure reply prefix for Clarisse`
+- `5864912f Add achievement reply prefix for Clarisse`
+- `3e0c514e Add low motivation reply prefix for Clarisse`
+- `aeed8248 Add hesitation guidance for Clarisse`
+- `979684e4 Add anxiety reply prefix for Clarisse`
+- `3327da0e Fix Clarisse player address`
+- `a3cc3aa6 Add tired reply prefix for Clarisse`
+- `8689034a Improve Clarisse role context`
+- `cabbad2c Update local Clarisse LLM integration`
 
-- `32cd134 Enhance result scene presentation`
-- 内容: ResultScene の戦利品交換商店背景、羊皮紙リザルトUI、獲得EXPの光るアニメーション、AGENT.md のレイアウト方針追記
+## クラリスLLM対応の整理結果
 
-現在のブランチには未コミット変更がある。
-
-## 未コミットの変更
-
-### クラリスのローカルLLM対応
-
-追加ファイル:
-
-- `Assets/Scripts/ClarisseLlmSettings.cs`
-- `Assets/Scripts/ClarisseLlmSettings.cs.meta`
-- `Assets/Scripts/ClarisseLlmResult.cs`
-- `Assets/Scripts/ClarisseLlmResult.cs.meta`
-- `Assets/Scripts/ClarisseLlmService.cs`
-- `Assets/Scripts/ClarisseLlmService.cs.meta`
-- `Assets/Scripts/LlamaCppUnityGateway.cs`
-- `Assets/Scripts/LlamaCppUnityGateway.cs.meta`
-- `Assets/StreamingAssets.meta`
-- `Assets/StreamingAssets/Models/README.txt`
-- `Assets/StreamingAssets/Models/README.txt.meta`
-
-変更ファイル:
-
-- `Assets/Scripts/HomeSceneController.cs`
-- `ProjectSettings/ProjectSettings.asset`
+HomeScene のクラリス会話は `ClarisseLlmService` 経由でローカルLLM生成する形になっている。
 
 主な内容:
 
-- ホーム画面のクラリス会話を固定文言から `ClarisseLlmService` 経由に変更
-- クラリスをタップしたときも、入力送信時もローカルLLM生成を試す
-- 生成中は `考え中...` を表示し、ボタンや入力欄を一時的にロックする
+- クラリスをタップした時、入力送信時にローカルLLM生成を試す
+- 生成中は `考え中...` を表示し、入力欄や送信ボタンをロックする
 - 入力は 50 文字、出力は 80 文字に制限
-- NGワードが含まれる入力には `・・・` を返す
-- `StreamingAssets/Models/Qwen3-0.6B-Q4_K_M.gguf` を想定
-- 実行時は `Application.persistentDataPath/Models` へモデルをコピーして使う設計
-- `LlamaCppUnityGateway` は `LLAMA_CPP_UNITY` シンボルが未定義なら無効化メッセージを返すスタブ
-- `ProjectSettings.asset` では `AndroidTargetArchitectures` が `3` から `2` に変更されている
+- NGワード検出時は `・・・` を返す
+- 直近4ターンの会話履歴をプロンプトに含める
+- 最新のユーザー入力への返答を優先するようプロンプトで指示
+- クラリスは自分自身の名前であり、ユーザーをクラリスと呼ばないよう指示
+- ユーザーへの呼びかけは `冒険者さん` に固定
+- LLMUnity 経由で `StreamingAssets/Models/Qwen3-0.6B-Q4_K_M.gguf` を利用する想定
+- `LlamaCppUnityGateway` は LLMUnity の `LLM` / `LLMAgent` をリフレクション経由で生成して呼び出す
+
+## 特殊ワード対応
+
+特殊ワードに当たっても基本的にはLLMを呼ぶ。
+
+接頭句を付ける系統:
+
+- 疲労系: `疲れた`, `しんどい`, `眠い`, `だるい`, `休みたい` など
+  - 接頭句: `お疲れ様ですわ、`
+- 不安系: `不安`, `怖い`, `心配`, `自信ない`, `できるかな` など
+  - 接頭句: `大丈夫ですわ、冒険者さん。`
+- やる気低下系: `やる気ない`, `めんどい`, `面倒`, `無理`, `やりたくない` など
+  - 接頭句: `今日は小さくで十分ですわ、`
+- 達成系: `できた`, `やれた`, `終わった`, `クリア`, `勝った`, `達成`, `成功` など
+  - 接頭句: `見事ですわ、冒険者さん。`
+- 失敗系: `失敗`, `負けた`, `できなかった`, `ミスった`, `間違えた` など
+  - 接頭句: `そこまで試したのが大事ですわ、`
+
+追加方針をプロンプトに渡す系統:
+
+- 迷い系: `迷う`, `決められない`, `わからない`, `悩む` など
+  - 選択肢を増やさず、最初の一歩を一つだけ返す
+- 怒り系: `むかつく`, `腹立つ`, `イライラ`, `嫌い` など
+  - 反論せず、感情を一度受けてから、何が引っかかったのかに戻す
+
+## CLI確認
+
+`tools/run_clarisse_dialogue_smoke.ps1` を追加済み。
+
+目的:
+
+- プロダクトコードにテストUIを組み込まず、CLIから固定入力を流してクラリスの返答ログを見る
+- 出力は人間が見て、プロンプトや特殊ワード設定の改善点を判断する
+
+使い方:
+
+```powershell
+.\tools\run_clarisse_dialogue_smoke.ps1
+```
 
 注意:
 
-- `LlamaCppUnityGateway.GenerateWithLlamaCppUnity` はまだ具体的な llama.cpp Unity パッケージ API に接続していない
-- モデル本体 `.gguf` はリポジトリには追加されていない
-- `StreamingAssets/Models/README.txt` だけが追加されている
-- `LLAMA_CPP_UNITY` の define 設定はまだ確認が必要
-
-### タイトル画面の空・雲ループ試作
-
-追加ファイル:
-
-- `Assets/Resources/Backgrounds/GuildEntranceSkyLoop.png`
-- `Assets/Resources/Backgrounds/GuildEntranceSkyLoop.png.meta`
-
-変更ファイル:
-
-- `Assets/Scripts/TitleSceneController.cs`
-
-主な内容:
-
-- 以前の白い雲スプライトを前面で流す実装を削除
-- `SkyLoopLayer` を追加し、`GuildEntranceSkyLoop.png` を 2 枚横に並べて背面でループ移動する実装へ変更
-- 既存の `CloudLayer` がシーンに残っている場合は非表示にする
-- `Background` は前景として `SkyLoopLayer` より前、UIパネルは最前面になるよう sibling order を調整
-
-注意:
-
-- `GuildEntranceBackground.png` の空部分を透過して前景化する試行をしたが、建物や旗まわりの切り抜きが不自然だったため撤回済み
-- 現在の `GuildEntranceBackground.png` は透過前の元画像に戻っている
-- そのため現状のままだと、背面の `SkyLoopLayer` は前景画像に隠れてほぼ見えない
-- タイトル画面の雲ループ方針は、前景画像をきれいに分離できる方法を決め直す必要がある
+- Unity Editor で同じプロジェクトを開いたままだと batchmode が起動できない
+- 実行時だけ `Assets/Scripts/ClarisseDialogueCliSmokeTest.generated.cs` を生成し、終了後に削除する
 
 ## 次に行う作業
 
-優先は `codex-local-llm-clarisse` の整理。
+次は ResultScene の実機表示問題を直す。
 
-1. クラリスLLM対応をこのブランチで続けるか、タイトル雲背景試作を別ブランチへ分けるか決める。
-2. `TitleSceneController.cs` と `GuildEntranceSkyLoop.png` を残すか、いったん撤回するか決める。
-3. クラリスLLMについて、`LlamaCppUnityGateway` を実際の llama.cpp Unity パッケージ API に接続する。
-4. `LLAMA_CPP_UNITY` define と Android の target architecture 変更が必要か確認する。
-5. モデル配置手順を `StreamingAssets/Models/README.txt` に十分書けているか確認する。
-6. `dotnet build thinquest.sln --no-restore` と `git diff --check` を実行する。
+問題:
 
-## タイトル雲背景についての次案
+- リザルト画面の結果部分が実機だと小さく見える
+- PC / Editor 上の見え方だけでなく、スマホ実機の解像度・アスペクト比・safe area で確認する必要がある
 
-今の元背景画像から自動マスクで空だけを抜くのは、遠景建物・旗・雲の境界が複雑で破綻しやすい。
+見るべきファイル:
 
-次にやるなら以下のどれかがよい。
+- `Assets/Scripts/ResultSceneController.cs`
 
-- 元背景を透過加工するのではなく、前景専用画像を生成し直す
-- ギルド建物と街並みを含む前景レイヤー、空雲レイヤーを最初から分けて生成する
-- タイトル背景全体を作り直し、空の領域を広く取りつつ建物を右寄せにする
-- いったん雲アニメーションは保留し、現在の静止背景へ戻す
+優先方針:
 
-## 作業後に確認すること
+- 結果本文、獲得EXP、能力値、講評、ボタンの表示サイズを実機基準で見直す
+- 固定px感の強い IMGUI レイアウトやスケール計算を確認する
+- 画面の横幅・縦幅・safe area に対して、結果パネルが小さくなりすぎない制約を入れる
+- 店主や背景の見た目より、まず結果情報の読みやすさを優先する
+
+作業後に確認すること:
 
 - `dotnet build thinquest.sln --no-restore`
 - `git diff --check`
-- HomeScene でクラリスをタップした時の表示
-- HomeScene でクラリス入力を送った時の表示
-- モデル未配置時に分かりやすいエラーが出ること
-- LLM生成中に入力欄やボタンが二重操作されないこと
-- TitleScene の背景レイヤー順序が壊れていないこと
+- Editor の Game view で複数アスペクト比確認
+- 可能なら Android 実機で ResultScene の結果部分の文字サイズとボタンサイズを確認
