@@ -208,7 +208,7 @@ internal sealed class ClarisseLlmService
             var turn = conversationHistory[i];
             if (!string.IsNullOrEmpty(turn.UserInput))
             {
-                builder.Append("冒険者の発言: ");
+                builder.Append("冒険者さんの発言: ");
                 builder.AppendLine(turn.UserInput);
             }
 
