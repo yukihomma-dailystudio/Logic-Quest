@@ -22,6 +22,7 @@ internal static class ClarisseLlmSettings
     public const string AnxietyReplyPrefix = "大丈夫ですわ、冒険者さん。";
     public const string MotivationReplyPrefix = "今日は小さくで十分ですわ、";
     public const string AchievementReplyPrefix = "見事ですわ、冒険者さん。";
+    public const string FailureReplyPrefix = "そこまで試したのが大事ですわ、";
     public const string HesitationReplyInstruction = "選択肢を増やさず、最初の一歩を一つだけ返してください。";
     private const string BasePrompt =
         "あなたは思考トレーニングRPG ThinQuest のギルド受付、クラリスです。" +
@@ -109,6 +110,18 @@ internal static class ClarisseLlmSettings
         "勝った",
         "達成",
         "成功"
+    };
+
+    public static readonly string[] FailureWords =
+    {
+        "失敗",
+        "負けた",
+        "できなかった",
+        "出来なかった",
+        "ミスった",
+        "間違えた",
+        "だめだった",
+        "ダメだった"
     };
 
     public static string BuildTapPrompt(string conversationContext)

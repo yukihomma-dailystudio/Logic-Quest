@@ -282,6 +282,11 @@ internal sealed class ClarisseLlmService
             return ClarisseLlmSettings.AchievementReplyPrefix;
         }
 
+        if (ContainsNormalizedWord(input, ClarisseLlmSettings.FailureWords))
+        {
+            return ClarisseLlmSettings.FailureReplyPrefix;
+        }
+
         return string.Empty;
     }
 
