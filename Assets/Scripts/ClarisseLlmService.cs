@@ -205,13 +205,13 @@ internal sealed class ClarisseLlmService
             var turn = conversationHistory[i];
             if (!string.IsNullOrEmpty(turn.UserInput))
             {
-                builder.Append("ユーザー: ");
+                builder.Append("冒険者の発言: ");
                 builder.AppendLine(turn.UserInput);
             }
 
             if (!string.IsNullOrEmpty(turn.ClarisseReply))
             {
-                builder.Append("クラリス: ");
+                builder.Append("あなたの返答: ");
                 builder.AppendLine(turn.ClarisseReply);
             }
         }
