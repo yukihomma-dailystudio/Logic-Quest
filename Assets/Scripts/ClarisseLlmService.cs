@@ -272,6 +272,11 @@ internal sealed class ClarisseLlmService
             return ClarisseLlmSettings.AnxietyReplyPrefix;
         }
 
+        if (ContainsNormalizedWord(input, ClarisseLlmSettings.MotivationWords))
+        {
+            return ClarisseLlmSettings.MotivationReplyPrefix;
+        }
+
         return string.Empty;
     }
 

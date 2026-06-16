@@ -20,6 +20,7 @@ internal static class ClarisseLlmSettings
     public const string BusyMessage = "クラリスはまだ考え中です。";
     public const string TiredReplyPrefix = "お疲れ様ですわ、";
     public const string AnxietyReplyPrefix = "大丈夫ですわ、冒険者さん。";
+    public const string MotivationReplyPrefix = "今日は小さくで十分ですわ、";
     public const string HesitationReplyInstruction = "選択肢を増やさず、最初の一歩を一つだけ返してください。";
     private const string BasePrompt =
         "あなたは思考トレーニングRPG ThinQuest のギルド受付、クラリスです。" +
@@ -83,6 +84,18 @@ internal static class ClarisseLlmSettings
         "分からない",
         "悩む",
         "悩んで"
+    };
+
+    public static readonly string[] MotivationWords =
+    {
+        "やる気ない",
+        "やる気がない",
+        "やる気出ない",
+        "やる気が出ない",
+        "めんどい",
+        "面倒",
+        "無理",
+        "やりたくない"
     };
 
     public static string BuildTapPrompt(string conversationContext)
