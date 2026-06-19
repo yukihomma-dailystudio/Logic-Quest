@@ -4,122 +4,89 @@
 
 作業ブランチは `main`。
 
-ログ追記前のローカルと `origin/main` は一致しており、クラリスLLM対応は `main` に反映済み。
+最新 push 済みコミット:
 
-現在はこのログ更新と `AGENT.md` の運用ルール追記が未コミット。
+- `0dd5f3fc Adjust guild entrance foreground transparency`
 
-最新コミット:
+直近の画像調整:
 
-- `52cbf2fb Update local Clarisse LLM integration`
+- `Assets/Resources/Backgrounds/GuildEntranceForeground.png`
+- ギルド入口前景画像に残っていた黒い縁を追加で透過
+- 閾値 `48`
+- 透明領域に隣接する黒だけを 4 pass 処理
+- 追加透過は `7072` px
+- `origin/main` へ push 済み
 
-直近で push 済みの主なコミット:
+現在の未コミット変更:
 
-- `52cbf2fb Update local Clarisse LLM integration`
-- `a3f885d6 Enhance result scene presentation`
-- `ad60df8d Add Clarisse dialogue smoke test tooling`
-- `d0598614 Add anger guidance for Clarisse`
-- `f32fc136 Add failure reply prefix for Clarisse`
-- `5864912f Add achievement reply prefix for Clarisse`
-- `3e0c514e Add low motivation reply prefix for Clarisse`
-- `aeed8248 Add hesitation guidance for Clarisse`
-- `979684e4 Add anxiety reply prefix for Clarisse`
-- `3327da0e Fix Clarisse player address`
-- `a3cc3aa6 Add tired reply prefix for Clarisse`
-- `8689034a Improve Clarisse role context`
-- `cabbad2c Update local Clarisse LLM integration`
-
-## クラリスLLM対応の整理結果
-
-HomeScene のクラリス会話は `ClarisseLlmService` 経由でローカルLLM生成する形になっている。
-
-主な内容:
-
-- クラリスをタップした時、入力送信時にローカルLLM生成を試す
-- 生成中は `考え中...` を表示し、入力欄や送信ボタンをロックする
-- `考え中...` 表示中もクラリス画像が半透明にならないよう、画像ボタンの disabledColor を白固定している
-- 入力は 50 文字、出力は 80 文字に制限
-- NGワード検出時は `・・・` を返す
-- 直近4ターンの会話履歴をプロンプトに含める
-- 最新のユーザー入力への返答を優先するようプロンプトで指示
-- クラリスは自分自身の名前であり、ユーザーをクラリスと呼ばないよう指示
-- ユーザーへの呼びかけは `冒険者さん` に固定
-- LLMUnity 経由で `StreamingAssets/Models/Qwen3-0.6B-Q4_K_M.gguf` を利用する想定
-- `LlamaCppUnityGateway` は LLMUnity の `LLM` / `LLMAgent` をリフレクション経由で生成して呼び出す
-
-## 特殊ワード対応
-
-特殊ワードに当たっても基本的にはLLMを呼ぶ。
-
-接頭句を付ける系統:
-
-- 疲労系: `疲れた`, `しんどい`, `眠い`, `だるい`, `休みたい` など
-  - 接頭句: `お疲れ様ですわ、`
-- 不安系: `不安`, `怖い`, `心配`, `自信ない`, `できるかな` など
-  - 接頭句: `大丈夫ですわ、冒険者さん。`
-- やる気低下系: `やる気ない`, `めんどい`, `面倒`, `無理`, `やりたくない` など
-  - 接頭句: `今日は小さくで十分ですわ、`
-- 達成系: `できた`, `やれた`, `終わった`, `クリア`, `勝った`, `達成`, `成功` など
-  - 接頭句: `見事ですわ、冒険者さん。`
-- 失敗系: `失敗`, `負けた`, `できなかった`, `ミスった`, `間違えた` など
-  - 接頭句: `そこまで試したのが大事ですわ、`
-
-追加方針をプロンプトに渡す系統:
-
-- 迷い系: `迷う`, `決められない`, `わからない`, `悩む` など
-  - 選択肢を増やさず、最初の一歩を一つだけ返す
-- 怒り系: `むかつく`, `腹立つ`, `イライラ`, `嫌い` など
-  - 反論せず、感情を一度受けてから、何が引っかかったのかに戻す
-
-## CLI確認
-
-`tools/run_clarisse_dialogue_smoke.ps1` を追加済み。
-
-目的:
-
-- プロダクトコードにテストUIを組み込まず、CLIから固定入力を流してクラリスの返答ログを見る
-- 出力は人間が見て、プロンプトや特殊ワード設定の改善点を判断する
-
-使い方:
-
-```powershell
-.\tools\run_clarisse_dialogue_smoke.ps1
-```
+- `history.md`
+- `log_next_feature.md`
+- `Assets/Scripts/ClarisseLlmSettings.cs`
 
 注意:
 
-- Unity Editor で同じプロジェクトを開いたままだと batchmode が起動できない
-- 実行時だけ `Assets/Scripts/ClarisseDialogueCliSmokeTest.generated.cs` を生成し、終了後に削除する
-
-## 作業運用メモ
-
-`AGENT.md` に次の運用ルールを追記済み。
-
-- ファイルを書き換える前に、変更予定箇所の差分案をユーザーへ提示する
-- 進め方は、ユーザーが OK したらこちらで書き換える、またはユーザー自身が差分案をもとに書き換える、の二択にする
+- `ClarisseLlmSettings.cs` はクラリスの口調・プロンプト調整で、画像修正 commit には含めていない
+- この次作業とは別変更として扱う
 
 ## 次に行う作業
 
-次は ResultScene の実機表示問題を直す。
+次は「今日起きたことを入力する」シーンとして、`ThemeInputScene` を調整する。
 
-問題:
+対象ファイル:
 
-- リザルト画面の結果部分が実機だと小さく見える
-- PC / Editor 上の見え方だけでなく、スマホ実機の解像度・アスペクト比・safe area で確認する必要がある
+- `Assets/Scripts/ThemeInputSceneController.cs`
+- 必要に応じて `Assets/Scenes/ThemeInputScene.unity`
 
-見るべきファイル:
+## 現状
 
-- `Assets/Scripts/ResultSceneController.cs`
+`ThemeInputSceneController.cs` は IMGUI ベースの簡素な入力画面。
 
-優先方針:
+現在の体験:
 
-- 結果本文、獲得EXP、能力値、講評、ボタンの表示サイズを実機基準で見直す
-- 固定px感の強い IMGUI レイアウトやスケール計算を確認する
-- 画面の横幅・縦幅・safe area に対して、結果パネルが小さくなりすぎない制約を入れる
-- 店主や背景の見た目より、まず結果情報の読みやすさを優先する
+- 画面タイトルは `クエストの巻物`
+- 説明文は「試練に持ち込む主張を書きましょう」
+- 初期入力は `毎日少しずつ考えを鍛えるクエスト`
+- 入力後は `EnemySelectScene` へ遷移
+- 保存キーは `ThinQuest.LastTheme`
 
-作業後に確認すること:
+## 調整方針
+
+目的:
+
+- 「テーマを考える」画面から、「今日起きたことを言葉にする」画面へ寄せる
+- ユーザーが日々の出来事を入力し、それを思考バトルの題材にできる流れにする
+
+優先する変更:
+
+- 見出しを日次記録寄りに変更
+- 説明文を「今日起きたこと」「気になったこと」「引っかかったこと」を書ける文脈に変更
+- 初期入力を空、または自然なサンプル文に見直す
+- 入力欄を数行入力しやすくする
+- ボタン文言を次の導線が分かる表現にする
+- 空入力時のエラーメッセージを日次入力に合わせる
+
+維持するもの:
+
+- `ThemeInputSceneController.LastThemeKey`
+- `PlayerPrefs` への保存
+- `EnemySelectScene` への遷移
+- 既存のシーン登録
+
+## 変更前に確認する差分案
+
+`AGENT.md` の運用ルールに従い、`ThemeInputSceneController.cs` を書き換える前に、変更予定箇所の差分案を提示する。
+
+想定差分:
+
+- `themeText` の初期値を日次入力向けに変更
+- 画面タイトルを `今日の出来事の巻物` などに変更
+- 説明文を日次記録向けに変更
+- `TextArea` の高さを広げる
+- ボタン文言を `相手を選ぶ` から `この出来事で試練へ` などに変更
+- 空入力メッセージを `今日起きたことを一言だけ書いてください。` などに変更
+
+## 確認予定
 
 - `dotnet build thinquest.sln --no-restore`
 - `git diff --check`
-- Editor の Game view で複数アスペクト比確認
-- 可能なら Android 実機で ResultScene の結果部分の文字サイズとボタンサイズを確認
+- 可能なら Unity Editor Game view で `ThemeInputScene` の表示確認

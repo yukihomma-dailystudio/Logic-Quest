@@ -453,3 +453,54 @@ push 済みコミット:
 
 - `AGENT.md` に、ファイル変更前は変更予定箇所の差分案を提示することを追記
 - 進め方は、ユーザーが OK したらこちらで書き換える、またはユーザー自身が差分案をもとに書き換える、の二択とする
+
+## 2026-06-19 ギルド入口前景の透過調整
+
+`main` で、タイトル/入口背景用の前景画像に残っていた黒い縁を追加で透過した。
+
+push 済みコミット:
+
+- `0dd5f3fc Adjust guild entrance foreground transparency`
+
+変更内容:
+
+- `Assets/Resources/Backgrounds/GuildEntranceForeground.png`
+- 既に透明な領域の近傍にある黒だけを追加で透過
+- 閾値は `48`
+- 全体の暗部を一括で抜くと建物や装飾まで巻き込むため、透明領域に隣接する黒だけを 4 pass 処理
+- 追加透過は `7072` px
+
+確認済み:
+
+- マゼンタ背景への合成プレビューで、黒い縁の抜け方と巻き込み範囲を確認
+- `origin/main` へ push 済み
+
+現在の未コミット変更:
+
+- `Assets/Scripts/ClarisseLlmSettings.cs`
+- 内容はクラリスの口調・プロンプト調整で、画像修正 commit には含めていない
+
+## 次の作業方針: ThemeInputScene 調整
+
+次は「今日起きたことを入力する」シーンとして、`ThemeInputScene` を調整する。
+
+現状:
+
+- `Assets/Scripts/ThemeInputSceneController.cs` は IMGUI ベース
+- 画面タイトルは `クエストの巻物`
+- 入力説明は「試練に持ち込む主張を書きましょう」
+- 初期入力は `毎日少しずつ考えを鍛えるクエスト`
+- 入力後は `EnemySelectScene` へ遷移する
+
+調整方針:
+
+- 「テーマ入力」よりも「今日起きたことを言葉にする」体験へ寄せる
+- 見出し、説明文、プレースホルダー/初期文言を日次記録寄りに変更する
+- 入力欄は短文だけでなく、今日の出来事を数行書ける前提にする
+- ボタン文言を次の導線が分かる表現にする
+- PlayerPrefs の `ThinQuest.LastTheme` と `EnemySelectScene` への導線は維持する
+
+確認予定:
+
+- `dotnet build thinquest.sln --no-restore`
+- `git diff --check`
