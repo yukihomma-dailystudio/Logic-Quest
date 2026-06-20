@@ -8,7 +8,7 @@ public sealed class ThemeInputSceneController : MonoBehaviour
     [SerializeField] private string homeSceneName = "HomeScene";
     [SerializeField] private string enemySelectSceneName = "EnemySelectScene";
 
-    private string themeText = "毎日少しずつ考えを鍛えるクエスト";
+    private string themeText = "";
     private bool showMissingThemeMessage;
     private bool showMissingEnemySelectSceneMessage;
 
@@ -77,25 +77,25 @@ public sealed class ThemeInputSceneController : MonoBehaviour
             normal = { textColor = new Color(0.55f, 0.2f, 0.16f) }
         };
 
-        GUI.Label(new Rect(panelRect.x, panelRect.y + 30f, panelRect.width, 44f), "クエストの巻物", titleStyle);
+        GUI.Label(new Rect(panelRect.x, panelRect.y + 30f, panelRect.width, 44f), "今日の冒険記録", titleStyle);
         GUI.Label(
             new Rect(panelRect.x + 54f, panelRect.y + 92f, panelRect.width - 108f, 48f),
-            "試練に持ち込む主張を書きましょう。次に、その主張を試す相手を選びます。",
+            "今日起きたこと、気になったこと、少し引っかかったことを書きましょう。",
             bodyStyle);
 
         GUI.SetNextControlName("ThemeInput");
         themeText = GUI.TextArea(
-            new Rect(panelRect.x + 70f, panelRect.y + 158f, panelRect.width - 140f, 96f),
+            new Rect(panelRect.x + 70f, panelRect.y + 158f, panelRect.width - 140f, 136f),
             themeText,
             180,
             inputStyle);
 
-        if (GUI.Button(new Rect(panelRect.x + 170f, panelRect.y + 282f, 140f, 40f), "戻る"))
+        if (GUI.Button(new Rect(panelRect.x + 170f, panelRect.y + 322f, 140f, 40f), "戻る"))
         {
             SceneManager.LoadScene(homeSceneName);
         }
 
-        if (GUI.Button(new Rect(panelRect.x + 330f, panelRect.y + 282f, 140f, 40f), "相手を選ぶ"))
+        if (GUI.Button(new Rect(panelRect.x + 330f, panelRect.y + 322f, 140f, 40f), "この記録で試練へ"))
         {
             TryChooseEnemy();
         }
@@ -103,15 +103,15 @@ public sealed class ThemeInputSceneController : MonoBehaviour
         if (showMissingThemeMessage)
         {
             GUI.Label(
-                new Rect(panelRect.x + 70f, panelRect.y + 344f, panelRect.width - 140f, 24f),
-                "試練に入る前に、巻物へ主張を書いてください。",
+                new Rect(panelRect.x + 70f, panelRect.y + 374f, panelRect.width - 140f, 24f),
+                "今日の出来事を一言だけ書いてください。",
                 messageStyle);
         }
 
         if (showMissingEnemySelectSceneMessage)
         {
             GUI.Label(
-                new Rect(panelRect.x + 70f, panelRect.y + 344f, panelRect.width - 140f, 40f),
+                new Rect(panelRect.x + 70f, panelRect.y + 374f, panelRect.width - 140f, 40f),
                 "EnemySelectScene がまだ登録されていません。戦闘導線は自動でつながります。",
                 messageStyle);
         }
