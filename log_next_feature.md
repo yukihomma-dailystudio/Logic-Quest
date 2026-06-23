@@ -2,91 +2,131 @@
 
 ## 現在の状態
 
-作業ブランチは `main`。
+作業ブランチは `theme-input-scene-adjustments`。
 
 最新 push 済みコミット:
 
-- `0dd5f3fc Adjust guild entrance foreground transparency`
+- `f8b9be07 Add quest notice board background`
 
-直近の画像調整:
+直近の push 済みコミット:
 
-- `Assets/Resources/Backgrounds/GuildEntranceForeground.png`
-- ギルド入口前景画像に残っていた黒い縁を追加で透過
-- 閾値 `48`
-- 透明領域に隣接する黒だけを 4 pass 処理
-- 追加透過は `7072` px
-- `origin/main` へ push 済み
+- `2256eb72 Adjust theme input daily record copy`
+- `f8b9be07 Add quest notice board background`
 
-現在の未コミット変更:
+作業ツリーは clean。
 
-- `history.md`
-- `log_next_feature.md`
-- `Assets/Scripts/ClarisseLlmSettings.cs`
+## 今回完了したこと
+
+`ThemeInputScene` を「今日起きたことを入力する」画面へ寄せる調整を開始した。
+
+### 文言・入力欄調整
+
+対象:
+
+- `Assets/Scripts/ThemeInputSceneController.cs`
+
+変更内容:
+
+- 画面タイトルを `今日の冒険記録` に変更
+- 説明文を「今日起きたこと、気になったこと、少し引っかかったこと」を書く方向へ変更
+- 初期入力を空に変更
+- 入力欄を `96f` から `136f` に拡大
+- 進行ボタンを `この記録で試練へ` に変更
+- 空入力メッセージを `今日の出来事を一言だけ書いてください。` に変更
+
+確認済み:
+
+- `dotnet build thinquest.sln --no-restore`
+- `git diff --check`
+
+### 掲示板背景画像追加
+
+対象:
+
+- `Assets/Resources/Backgrounds/QuestNoticeBoardBackground.png`
+- `Assets/Resources/Backgrounds/QuestNoticeBoardBackground.png.meta`
+
+内容:
+
+- 漫画やRPGでよくある依頼掲示板をイメージした背景
+- 周囲に依頼書、地図、封蝋、ピン、リボンを配置
+- 中央に入力用として使える大きめの依頼用紙を配置
+- 最初の案より中央用紙を約 3 分の 2 サイズにした版を採用
 
 注意:
 
-- `ClarisseLlmSettings.cs` はクラリスの口調・プロンプト調整で、画像修正 commit には含めていない
-- この次作業とは別変更として扱う
+- 背景画像は Resources に保存済み
+- まだ `ThemeInputSceneController.cs` から読み込んでいない
+- つまり Unity 上の `今日の冒険記録` シーン背景は、現時点ではまだ単色背景のまま
 
 ## 次に行う作業
 
-次は「今日起きたことを入力する」シーンとして、`ThemeInputScene` を調整する。
+`ThemeInputScene` に `QuestNoticeBoardBackground` を実際に接続する。
 
 対象ファイル:
 
 - `Assets/Scripts/ThemeInputSceneController.cs`
-- 必要に応じて `Assets/Scenes/ThemeInputScene.unity`
 
-## 現状
+想定差分:
 
-`ThemeInputSceneController.cs` は IMGUI ベースの簡素な入力画面。
+```diff
++ [SerializeField] private Texture2D noticeBoardBackground;
 
-現在の体験:
+  private void Start()
+  {
+      themeText = PlayerPrefs.GetString(LastThemeKey, themeText);
++     if (noticeBoardBackground == null)
++     {
++         noticeBoardBackground = Resources.Load<Texture2D>("Backgrounds/QuestNoticeBoardBackground");
++     }
+  }
 
-- 画面タイトルは `クエストの巻物`
-- 説明文は「試練に持ち込む主張を書きましょう」
-- 初期入力は `毎日少しずつ考えを鍛えるクエスト`
-- 入力後は `EnemySelectScene` へ遷移
-- 保存キーは `ThinQuest.LastTheme`
+  private void DrawBackground()
+  {
++     if (noticeBoardBackground != null)
++     {
++         GUI.DrawTexture(
++             new Rect(0f, 0f, Screen.width, Screen.height),
++             noticeBoardBackground,
++             ScaleMode.ScaleAndCrop,
++             false);
++         return;
++     }
++
+      // fallback: existing flat dark background
+  }
+```
 
-## 調整方針
+## UI再調整の方針
 
-目的:
+背景接続後、中央の依頼用紙に合わせて UI 位置を調整する。
 
-- 「テーマを考える」画面から、「今日起きたことを言葉にする」画面へ寄せる
-- ユーザーが日々の出来事を入力し、それを思考バトルの題材にできる流れにする
+優先事項:
 
-優先する変更:
+- `今日の冒険記録` タイトルを中央依頼用紙の上部に収める
+- 説明文と入力欄を依頼用紙の中央に置く
+- `この記録で試練へ` ボタンが封蝋や装飾と重ならないようにする
+- 既存の単色 `GUI.Box` は薄くするか削除する
+- 文字が背景に埋もれる場合は、半透明の淡い紙色レイヤーを最小限だけ重ねる
 
-- 見出しを日次記録寄りに変更
-- 説明文を「今日起きたこと」「気になったこと」「引っかかったこと」を書ける文脈に変更
-- 初期入力を空、または自然なサンプル文に見直す
-- 入力欄を数行入力しやすくする
-- ボタン文言を次の導線が分かる表現にする
-- 空入力時のエラーメッセージを日次入力に合わせる
-
-維持するもの:
+維持する仕様:
 
 - `ThemeInputSceneController.LastThemeKey`
 - `PlayerPrefs` への保存
 - `EnemySelectScene` への遷移
-- 既存のシーン登録
-
-## 変更前に確認する差分案
-
-`AGENT.md` の運用ルールに従い、`ThemeInputSceneController.cs` を書き換える前に、変更予定箇所の差分案を提示する。
-
-想定差分:
-
-- `themeText` の初期値を日次入力向けに変更
-- 画面タイトルを `今日の出来事の巻物` などに変更
-- 説明文を日次記録向けに変更
-- `TextArea` の高さを広げる
-- ボタン文言を `相手を選ぶ` から `この出来事で試練へ` などに変更
-- 空入力メッセージを `今日起きたことを一言だけ書いてください。` などに変更
+- `homeSceneName` / `enemySelectSceneName` の serialized field
 
 ## 確認予定
 
-- `dotnet build thinquest.sln --no-restore`
 - `git diff --check`
+- `dotnet build thinquest.sln --no-restore`
 - 可能なら Unity Editor Game view で `ThemeInputScene` の表示確認
+
+## Git 状態メモ
+
+現在:
+
+- Branch: `theme-input-scene-adjustments`
+- Remote tracking: `origin/theme-input-scene-adjustments`
+- Latest: `f8b9be07 Add quest notice board background`
+- Working tree: clean

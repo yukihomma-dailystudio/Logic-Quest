@@ -504,3 +504,48 @@ push 済みコミット:
 
 - `dotnet build thinquest.sln --no-restore`
 - `git diff --check`
+
+## 2026-06-23 ThemeInputScene の日次入力化と掲示板背景追加
+
+`theme-input-scene-adjustments` ブランチで、「今日起きたことを入力する」シーンの調整を開始した。
+
+push 済みコミット:
+
+- `2256eb72 Adjust theme input daily record copy`
+- `f8b9be07 Add quest notice board background`
+
+主な変更:
+
+- `Assets/Scripts/ThemeInputSceneController.cs`
+  - 画面タイトルを `今日の冒険記録` に変更
+  - 説明文を「今日起きたこと、気になったこと、少し引っかかったこと」を書く方向へ変更
+  - 初期入力を空に変更
+  - 入力欄を `96f` から `136f` に拡大
+  - 進行ボタンを `この記録で試練へ` に変更
+  - 空入力メッセージを `今日の出来事を一言だけ書いてください。` に変更
+
+- `Assets/Resources/Backgrounds/QuestNoticeBoardBackground.png`
+  - 依頼掲示板背景を追加
+  - 中央に、入力用に使える依頼用紙を配置
+  - 最初の案より中央用紙を約 3 分の 2 サイズにした版を採用
+  - `.meta` も追加済み
+
+確認済み:
+
+- `dotnet build thinquest.sln --no-restore`
+- `git diff --check`
+- 追加した背景画像の表示確認
+
+現在の状態:
+
+- ブランチ: `theme-input-scene-adjustments`
+- 最新コミット: `f8b9be07 Add quest notice board background`
+- `origin/theme-input-scene-adjustments` へ push 済み
+- 作業ツリーは clean
+
+未完了:
+
+- `ThemeInputSceneController.cs` はまだ `QuestNoticeBoardBackground` を背景として読み込んでいない
+- 現状の `DrawBackground()` は単色背景のまま
+- 次回は `Resources.Load<Texture2D>("Backgrounds/QuestNoticeBoardBackground")` を追加し、画像を `ScaleMode.ScaleAndCrop` で描画する
+- 中央の依頼用紙サイズに合わせて、タイトル、説明、入力欄、ボタンの位置とサイズを再調整する
