@@ -549,3 +549,32 @@ push 済みコミット:
 - 現状の `DrawBackground()` は単色背景のまま
 - 次回は `Resources.Load<Texture2D>("Backgrounds/QuestNoticeBoardBackground")` を追加し、画像を `ScaleMode.ScaleAndCrop` で描画する
 - 中央の依頼用紙サイズに合わせて、タイトル、説明、入力欄、ボタンの位置とサイズを再調整する
+
+### ThemeInputScene 掲示板背景への UI フィット
+
+追加 push 済みコミット:
+
+- `4650def6 Fit theme input UI to notice board`
+
+`Assets/Scripts/ThemeInputSceneController.cs` を更新し、追加済みの `QuestNoticeBoardBackground` を実際に画面へ接続した。
+
+主な変更:
+
+- `noticeBoardBackground` を serialized field として追加
+- 未設定時は `Resources.Load<Texture2D>("Backgrounds/QuestNoticeBoardBackground")` で読み込み
+- 背景を `ScaleMode.ScaleAndCrop` で描画
+- 背景画像上の座標を画面サイズに合わせて変換する `GetScaledBackgroundRect()` を追加
+- 中央の依頼用紙上部に `今日の出来事` を配置
+- 罫線部分に入力欄を配置
+- 左下の備考欄風の枠に `今日の試練を選ぶ` ボタンを配置
+- `戻る` ボタンは画面左上へ移動
+
+確認済み:
+
+- `dotnet build thinquest.sln --no-restore`
+- `git diff --check`
+
+残り:
+
+- Unity Editor Game view での実表示確認
+- 必要に応じた座標微調整
