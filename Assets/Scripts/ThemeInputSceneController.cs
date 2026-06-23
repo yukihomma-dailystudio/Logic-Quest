@@ -7,6 +7,7 @@ public sealed class ThemeInputSceneController : MonoBehaviour
 
     [SerializeField] private string homeSceneName = "HomeScene";
     [SerializeField] private string enemySelectSceneName = "EnemySelectScene";
+    [SerializeField] private Texture2D noticeBoardBackground;
 
     private string themeText = "";
     private bool showMissingThemeMessage;
@@ -15,6 +16,10 @@ public sealed class ThemeInputSceneController : MonoBehaviour
     private void Start()
     {
         themeText = PlayerPrefs.GetString(LastThemeKey, themeText);
+        if (noticeBoardBackground == null)
+        {
+            noticeBoardBackground = Resources.Load<Texture2D>("Backgrounds/QuestNoticeBoardBackground");
+        }
     }
 
     private void OnGUI()
@@ -25,6 +30,16 @@ public sealed class ThemeInputSceneController : MonoBehaviour
 
     private void DrawBackground()
     {
+        if (noticeBoardBackground != null)
+        {
+            GUI.DrawTexture(
+                new Rect(0f, 0f, Screen.width, Screen.height),
+                noticeBoardBackground,
+                ScaleMode.ScaleAndCrop,
+                false);
+            return;
+        }
+
         var previousColor = GUI.color;
         GUI.color = new Color(0.08f, 0.09f, 0.08f, 1f);
         GUI.DrawTexture(new Rect(0f, 0f, Screen.width, Screen.height), Texture2D.whiteTexture);
@@ -33,69 +48,65 @@ public sealed class ThemeInputSceneController : MonoBehaviour
 
     private void DrawThemePanel()
     {
-        const float panelWidth = 640f;
-        const float panelHeight = 420f;
-
-        var panelRect = new Rect(
-            (Screen.width - panelWidth) * 0.5f,
-            (Screen.height - panelHeight) * 0.5f,
-            panelWidth,
-            panelHeight);
-
-        var previousColor = GUI.color;
-        GUI.color = new Color(0.83f, 0.75f, 0.57f, 1f);
-        GUI.Box(panelRect, GUIContent.none);
-        GUI.color = previousColor;
+        var paperRect = GetScaledBackgroundRect(630f, 255f, 420f, 468f);
+        var titleRect = GetScaledBackgroundRect(747f, 314f, 175f, 35f);
+        var inputRect = GetScaledBackgroundRect(694f, 381f, 280f, 205f);
+        var challengeButtonRect = GetScaledBackgroundRect(668f, 628f, 230f, 52f);
+        var messageRect = GetScaledBackgroundRect(680f, 690f, 300f, 30f);
 
         var titleStyle = new GUIStyle(GUI.skin.label)
         {
             alignment = TextAnchor.MiddleCenter,
-            fontSize = 32,
+            fontSize = Mathf.Clamp(Mathf.RoundToInt(titleRect.height * 0.6f), 18, 28),
             fontStyle = FontStyle.Bold,
             normal = { textColor = new Color(0.2f, 0.11f, 0.05f) }
         };
 
-        var bodyStyle = new GUIStyle(GUI.skin.label)
-        {
-            alignment = TextAnchor.MiddleCenter,
-            fontSize = 16,
-            wordWrap = true,
-            normal = { textColor = new Color(0.25f, 0.17f, 0.09f) }
-        };
-
         var inputStyle = new GUIStyle(GUI.skin.textArea)
         {
-            fontSize = 16,
-            wordWrap = true
+            fontSize = Mathf.Clamp(Mathf.RoundToInt(inputRect.height * 0.08f), 14, 20),
+            wordWrap = true,
+            padding = new RectOffset(14, 14, 10, 10),
+            normal =
+            {
+                background = null,
+                textColor = new Color(0.22f, 0.13f, 0.07f)
+            },
+            focused =
+            {
+                background = null,
+                textColor = new Color(0.22f, 0.13f, 0.07f)
+            }
         };
 
         var messageStyle = new GUIStyle(GUI.skin.label)
         {
             alignment = TextAnchor.MiddleCenter,
-            fontSize = 14,
+            fontSize = Mathf.Clamp(Mathf.RoundToInt(paperRect.height * 0.035f), 12, 16),
             wordWrap = true,
             normal = { textColor = new Color(0.55f, 0.2f, 0.16f) }
         };
 
-        GUI.Label(new Rect(panelRect.x, panelRect.y + 30f, panelRect.width, 44f), "今日の冒険記録", titleStyle);
-        GUI.Label(
-            new Rect(panelRect.x + 54f, panelRect.y + 92f, panelRect.width - 108f, 48f),
-            "今日起きたこと、気になったこと、少し引っかかったことを書きましょう。",
-            bodyStyle);
+        var previousColor = GUI.color;
+        GUI.color = new Color(1f, 0.96f, 0.84f, 0.18f);
+        GUI.DrawTexture(inputRect, Texture2D.whiteTexture);
+        GUI.color = previousColor;
+
+        GUI.Label(titleRect, "今日の出来事", titleStyle);
 
         GUI.SetNextControlName("ThemeInput");
         themeText = GUI.TextArea(
-            new Rect(panelRect.x + 70f, panelRect.y + 158f, panelRect.width - 140f, 136f),
+            inputRect,
             themeText,
             180,
             inputStyle);
 
-        if (GUI.Button(new Rect(panelRect.x + 170f, panelRect.y + 322f, 140f, 40f), "戻る"))
+        if (GUI.Button(GetSafeBackButtonRect(), "戻る"))
         {
             SceneManager.LoadScene(homeSceneName);
         }
 
-        if (GUI.Button(new Rect(panelRect.x + 330f, panelRect.y + 322f, 140f, 40f), "この記録で試練へ"))
+        if (GUI.Button(challengeButtonRect, "今日の試練を選ぶ"))
         {
             TryChooseEnemy();
         }
@@ -103,7 +114,7 @@ public sealed class ThemeInputSceneController : MonoBehaviour
         if (showMissingThemeMessage)
         {
             GUI.Label(
-                new Rect(panelRect.x + 70f, panelRect.y + 374f, panelRect.width - 140f, 24f),
+                messageRect,
                 "今日の出来事を一言だけ書いてください。",
                 messageStyle);
         }
@@ -111,10 +122,35 @@ public sealed class ThemeInputSceneController : MonoBehaviour
         if (showMissingEnemySelectSceneMessage)
         {
             GUI.Label(
-                new Rect(panelRect.x + 70f, panelRect.y + 374f, panelRect.width - 140f, 40f),
+                messageRect,
                 "EnemySelectScene がまだ登録されていません。戦闘導線は自動でつながります。",
                 messageStyle);
         }
+    }
+
+    private static Rect GetScaledBackgroundRect(float x, float y, float width, float height)
+    {
+        const float sourceWidth = 1680f;
+        const float sourceHeight = 920f;
+
+        var scale = Mathf.Max(Screen.width / sourceWidth, Screen.height / sourceHeight);
+        var drawnWidth = sourceWidth * scale;
+        var drawnHeight = sourceHeight * scale;
+        var offsetX = (Screen.width - drawnWidth) * 0.5f;
+        var offsetY = (Screen.height - drawnHeight) * 0.5f;
+
+        return new Rect(
+            offsetX + x * scale,
+            offsetY + y * scale,
+            width * scale,
+            height * scale);
+    }
+
+    private static Rect GetSafeBackButtonRect()
+    {
+        var width = Mathf.Clamp(Screen.width * 0.11f, 86f, 128f);
+        var height = Mathf.Clamp(Screen.height * 0.05f, 32f, 44f);
+        return new Rect(24f, 24f, width, height);
     }
 
     private void TryChooseEnemy()
