@@ -60,6 +60,7 @@ internal sealed class ClarisseLlmService
         var receivedResult = false;
         yield return gateway.Generate(
             ClarisseLlmSettings.GetPersistentModelPath(),
+            ClarisseLlmSettings.GetSystemPrompt(),
             prompt,
             ClarisseLlmSettings.MaxGeneratedTokens,
             ClarisseLlmSettings.Temperature,

@@ -14,6 +14,10 @@ public sealed class BattleSceneController : MonoBehaviour
     private bool showMissingAnswerMessage;
     private bool rewardClaimed;
     private string awardedAbility = "説明力";
+    private BattleLlmService battleLlmService;
+    private bool isGeneratingObjection;
+    private bool isGeneratingEvaluation;
+    private string aiStatusText = "";
 
     private void Start()
     {
@@ -21,6 +25,8 @@ public sealed class BattleSceneController : MonoBehaviour
         selectedEnemy = PlayerPrefs.GetString(EnemySelectSceneController.LastEnemyKey, selectedEnemy);
         enemyObjection = GetEnemyObjection(selectedEnemy);
         awardedAbility = GetAwardedAbility(selectedEnemy);
+        battleLlmService = new BattleLlmService();
+        StartCoroutine(GenerateEnemyObjection());
     }
 
     private void OnGUI()
@@ -120,16 +126,22 @@ public sealed class BattleSceneController : MonoBehaviour
 
         if (!rewardClaimed)
         {
+            var previousEnabled = GUI.enabled;
+            GUI.enabled = !isGeneratingObjection && !isGeneratingEvaluation;
             answerText = GUI.TextArea(
                 new Rect(contentX, panelRect.y + 300f, contentWidth, 96f),
                 answerText,
                 220,
                 inputStyle);
 
-            if (GUI.Button(new Rect(panelRect.x + 300f, panelRect.y + 414f, 160f, 38f), "返答する"))
+            var submitLabel = isGeneratingObjection
+                ? "敵が思案中..."
+                : isGeneratingEvaluation ? "判定中..." : "返答する";
+            if (GUI.Button(new Rect(panelRect.x + 300f, panelRect.y + 414f, 160f, 38f), submitLabel))
             {
                 TrySubmitAnswer();
             }
+            GUI.enabled = previousEnabled;
 
             if (showMissingAnswerMessage)
             {
@@ -138,10 +150,24 @@ public sealed class BattleSceneController : MonoBehaviour
                     "敵に返す言葉を巻物へ書いてください。",
                     messageStyle);
             }
+            else if (!string.IsNullOrEmpty(aiStatusText))
+            {
+                GUI.Label(
+                    new Rect(contentX, panelRect.y + 462f, contentWidth, 36f),
+                    aiStatusText,
+                    messageStyle);
+            }
         }
         else
         {
             GUI.Label(new Rect(contentX, panelRect.y + 300f, contentWidth, 70f), evaluationText, bodyStyle);
+            if (!string.IsNullOrEmpty(aiStatusText))
+            {
+                GUI.Label(
+                    new Rect(contentX, panelRect.y + 372f, contentWidth, 24f),
+                    aiStatusText,
+                    messageStyle);
+            }
             GUI.Label(
                 new Rect(contentX, panelRect.y + 402f, contentWidth, 28f),
                 $"{awardedAbility} EXP +20 を獲得しました。ギルドで記録を確認できます。",
@@ -161,6 +187,11 @@ public sealed class BattleSceneController : MonoBehaviour
 
     private void TrySubmitAnswer()
     {
+        if (isGeneratingObjection || isGeneratingEvaluation)
+        {
+            return;
+        }
+
         answerText = answerText.Trim();
         showMissingAnswerMessage = string.IsNullOrEmpty(answerText);
 
@@ -169,7 +200,57 @@ public sealed class BattleSceneController : MonoBehaviour
             return;
         }
 
-        evaluationText = BuildEvaluation(answerText);
+        StartCoroutine(GenerateEvaluation());
+    }
+
+    private System.Collections.IEnumerator GenerateEnemyObjection()
+    {
+        isGeneratingObjection = true;
+        aiStatusText = "Qwenが敵の反論を練っています。";
+        var result = ClarisseLlmResult.Error(ClarisseLlmSettings.GenerationFailedMessage);
+        yield return battleLlmService.GenerateObjection(
+            selectedTheme,
+            selectedEnemy,
+            nextResult => result = nextResult);
+
+        isGeneratingObjection = false;
+        if (result.Success)
+        {
+            enemyObjection = result.Text;
+            aiStatusText = "";
+            yield break;
+        }
+
+        enemyObjection = GetEnemyObjection(selectedEnemy);
+        aiStatusText = "Qwenを利用できないため、標準の反論で試練を続けます。";
+        Debug.LogWarning($"Battle objection generation failed: {result.Text}");
+    }
+
+    private System.Collections.IEnumerator GenerateEvaluation()
+    {
+        isGeneratingEvaluation = true;
+        aiStatusText = "Qwenが返答を吟味しています。";
+        var result = ClarisseLlmResult.Error(ClarisseLlmSettings.GenerationFailedMessage);
+        yield return battleLlmService.GenerateEvaluation(
+            selectedTheme,
+            selectedEnemy,
+            enemyObjection,
+            answerText,
+            nextResult => result = nextResult);
+
+        isGeneratingEvaluation = false;
+        if (result.Success)
+        {
+            evaluationText = result.Text;
+            aiStatusText = "";
+        }
+        else
+        {
+            evaluationText = BuildEvaluation(answerText);
+            aiStatusText = "Qwenを利用できないため、標準の判定を使用しました。";
+            Debug.LogWarning($"Battle evaluation generation failed: {result.Text}");
+        }
+
         ClaimReward();
     }
 

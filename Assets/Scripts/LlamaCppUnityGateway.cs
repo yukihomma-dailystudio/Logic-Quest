@@ -6,29 +6,37 @@ using UnityEngine;
 
 internal sealed class LlamaCppUnityGateway
 {
-    private const string RuntimeRootName = "ClarisseLocalLlmRuntime";
+    private const string RuntimeRootName = "ThinQuestLocalLlmRuntime";
     private const string LlmTypeName = "LLMUnity.LLM";
     private const string LlmAgentTypeName = "LLMUnity.LLMAgent";
     private const string LlmUnitySetupTypeName = "LLMUnity.LLMUnitySetup";
     private static bool loggedMissingTypes;
 
-    private Component llm;
-    private Component llmAgent;
-    private string loadedModelPath;
+    private static Component llm;
+    private static Component llmAgent;
+    private static string loadedModelPath;
+    private static string loadedSystemPrompt;
 
-    public IEnumerator Generate(string modelPath, string prompt, int maxTokens, float temperature, System.Action<ClarisseLlmResult> onComplete)
-    {
-        yield return GenerateWithLlamaCppUnity(modelPath, prompt, maxTokens, temperature, onComplete);
-    }
-
-    private IEnumerator GenerateWithLlamaCppUnity(
+    public IEnumerator Generate(
         string modelPath,
+        string systemPrompt,
         string prompt,
         int maxTokens,
         float temperature,
         System.Action<ClarisseLlmResult> onComplete)
     {
-        yield return EnsureRuntime(modelPath, maxTokens, temperature);
+        yield return GenerateWithLlamaCppUnity(modelPath, systemPrompt, prompt, maxTokens, temperature, onComplete);
+    }
+
+    private IEnumerator GenerateWithLlamaCppUnity(
+        string modelPath,
+        string systemPrompt,
+        string prompt,
+        int maxTokens,
+        float temperature,
+        System.Action<ClarisseLlmResult> onComplete)
+    {
+        yield return EnsureRuntime(modelPath, systemPrompt, maxTokens, temperature);
 
         if (llm == null || llmAgent == null)
         {
@@ -60,7 +68,7 @@ internal sealed class LlamaCppUnityGateway
         onComplete?.Invoke(ClarisseLlmResult.Ok(chatTask.Result));
     }
 
-    private IEnumerator EnsureRuntime(string modelPath, int maxTokens, float temperature)
+    private IEnumerator EnsureRuntime(string modelPath, string systemPrompt, int maxTokens, float temperature)
     {
         if (!IsLlmUnityAvailable())
         {
@@ -74,19 +82,24 @@ internal sealed class LlamaCppUnityGateway
             DestroyRuntime();
         }
 
-        if (llm != null && llmAgent != null && loadedModelPath == modelPath && GetBoolProperty(llm, "started"))
+        if (llm != null &&
+            llmAgent != null &&
+            loadedModelPath == modelPath &&
+            loadedSystemPrompt == systemPrompt &&
+            GetBoolProperty(llm, "started"))
         {
+            ConfigureAgent(maxTokens, temperature);
             yield break;
         }
 
-        if (llm != null && loadedModelPath != modelPath)
+        if (llm != null && (loadedModelPath != modelPath || loadedSystemPrompt != systemPrompt))
         {
             DestroyRuntime();
         }
 
         if (llm == null || llmAgent == null)
         {
-            if (!CreateRuntime(modelPath, maxTokens, temperature))
+            if (!CreateRuntime(modelPath, systemPrompt, maxTokens, temperature))
             {
                 yield break;
             }
@@ -111,6 +124,7 @@ internal sealed class LlamaCppUnityGateway
         llm = null;
         llmAgent = null;
         loadedModelPath = null;
+        loadedSystemPrompt = null;
     }
 
     private static bool IsLlmUnityAvailable()
@@ -153,7 +167,7 @@ internal sealed class LlamaCppUnityGateway
         }
     }
 
-    private bool CreateRuntime(string modelPath, int maxTokens, float temperature)
+    private bool CreateRuntime(string modelPath, string systemPrompt, int maxTokens, float temperature)
     {
         var llmType = FindType(LlmTypeName);
         var llmAgentType = FindType(LlmAgentTypeName);
@@ -177,17 +191,28 @@ internal sealed class LlamaCppUnityGateway
 
         llmAgent = runtimeObject.AddComponent(llmAgentType);
         SetMember(llmAgent, "llm", llm);
-        SetMember(llmAgent, "systemPrompt", ClarisseLlmSettings.GetSystemPrompt());
-        SetMember(llmAgent, "numPredict", maxTokens);
-        SetMember(llmAgent, "temperature", temperature);
+        SetMember(llmAgent, "systemPrompt", systemPrompt);
         SetMember(llmAgent, "topK", 40);
         SetMember(llmAgent, "topP", 0.9f);
         SetMember(llmAgent, "repeatPenalty", 1.1f);
         SetMember(llmAgent, "cachePrompt", false);
+        ConfigureAgent(maxTokens, temperature);
 
         loadedModelPath = modelPath;
+        loadedSystemPrompt = systemPrompt;
         runtimeObject.SetActive(true);
         return true;
+    }
+
+    private static void ConfigureAgent(int maxTokens, float temperature)
+    {
+        if (llmAgent == null)
+        {
+            return;
+        }
+
+        SetMember(llmAgent, "numPredict", maxTokens);
+        SetMember(llmAgent, "temperature", temperature);
     }
 
     private Task<string> InvokeChat(string prompt)
