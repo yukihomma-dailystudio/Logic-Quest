@@ -49,9 +49,10 @@ public sealed class ThemeInputSceneController : MonoBehaviour
     private void DrawThemePanel()
     {
         var paperRect = GetScaledBackgroundRect(630f, 255f, 420f, 468f);
-        var titleRect = GetScaledBackgroundRect(747f, 314f, 175f, 35f);
-        var inputRect = GetScaledBackgroundRect(694f, 381f, 280f, 205f);
-        var challengeButtonRect = GetScaledBackgroundRect(668f, 628f, 230f, 52f);
+        var titleRect = GetScaledBackgroundRect(750f, 305f,175f, 35f);
+        var inputRect = GetScaledBackgroundRect(694f, 370f, 280f, 205f);
+        var challengeButtonRect = GetScaledBackgroundRect(668f, 615f, 230f, 52f);
+        var backButtonRect = GetScaledBackgroundRect(668f, 670f, 42f, 35f);
         var messageRect = GetScaledBackgroundRect(680f, 690f, 300f, 30f);
 
         var titleStyle = new GUIStyle(GUI.skin.label)
@@ -62,7 +63,7 @@ public sealed class ThemeInputSceneController : MonoBehaviour
             normal = { textColor = new Color(0.2f, 0.11f, 0.05f) }
         };
 
-        var inputStyle = new GUIStyle(GUI.skin.textArea)
+        var inputStyle = new GUIStyle(GUIStyle.none)
         {
             fontSize = Mathf.Clamp(Mathf.RoundToInt(inputRect.height * 0.08f), 14, 20),
             wordWrap = true,
@@ -78,6 +79,9 @@ public sealed class ThemeInputSceneController : MonoBehaviour
                 textColor = new Color(0.22f, 0.13f, 0.07f)
             }
         };
+        inputStyle.hover.background = null;
+        inputStyle.active.background = null;
+        inputStyle.focused.background = null;
 
         var messageStyle = new GUIStyle(GUI.skin.label)
         {
@@ -87,10 +91,18 @@ public sealed class ThemeInputSceneController : MonoBehaviour
             normal = { textColor = new Color(0.55f, 0.2f, 0.16f) }
         };
 
-        var previousColor = GUI.color;
-        GUI.color = new Color(1f, 0.96f, 0.84f, 0.18f);
-        GUI.DrawTexture(inputRect, Texture2D.whiteTexture);
-        GUI.color = previousColor;
+        var challengeButtonStyle = new GUIStyle(GUI.skin.button)
+        {
+            fontSize = Mathf.Clamp(Mathf.RoundToInt(challengeButtonRect.height * 0.34f) + 4, 18, 28),
+            fontStyle = FontStyle.Bold,
+            wordWrap = true
+        };
+
+        var backButtonStyle = new GUIStyle(GUI.skin.button)
+        {
+            fontSize = Mathf.Clamp(Mathf.RoundToInt(backButtonRect.height * 0.34f), 12, 18),
+            fontStyle = FontStyle.Bold
+        };
 
         GUI.Label(titleRect, "今日の出来事", titleStyle);
 
@@ -101,12 +113,12 @@ public sealed class ThemeInputSceneController : MonoBehaviour
             180,
             inputStyle);
 
-        if (GUI.Button(GetSafeBackButtonRect(), "戻る"))
+        if (GUI.Button(backButtonRect, "戻る", backButtonStyle))
         {
             SceneManager.LoadScene(homeSceneName);
         }
 
-        if (GUI.Button(challengeButtonRect, "今日の試練を選ぶ"))
+        if (GUI.Button(challengeButtonRect, "今日の試練を選ぶ", challengeButtonStyle))
         {
             TryChooseEnemy();
         }
@@ -144,13 +156,6 @@ public sealed class ThemeInputSceneController : MonoBehaviour
             offsetY + y * scale,
             width * scale,
             height * scale);
-    }
-
-    private static Rect GetSafeBackButtonRect()
-    {
-        var width = Mathf.Clamp(Screen.width * 0.11f, 86f, 128f);
-        var height = Mathf.Clamp(Screen.height * 0.05f, 32f, 44f);
-        return new Rect(24f, 24f, width, height);
     }
 
     private void TryChooseEnemy()
